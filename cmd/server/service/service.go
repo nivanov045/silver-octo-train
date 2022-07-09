@@ -18,7 +18,6 @@ type service struct {
 	storage Storage
 }
 
-// ParseAndSet implements api.Service
 func (ser *service) ParseAndSet(s string) error {
 	ss := strings.Split(s, "/")
 	if len(ss) != 3 {

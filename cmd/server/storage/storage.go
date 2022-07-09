@@ -24,8 +24,6 @@ func (s *storage) SetGaugeMetrics(name string, val met.Gauge) {
 }
 
 func New() *storage {
-	// M.Cms = make(map[string]met.Counter)
-	// M.Gms = make(map[string]met.Gauge)
 	return &storage{
 		M: met.Metrics{
 			Gms: map[string]met.Gauge{},
