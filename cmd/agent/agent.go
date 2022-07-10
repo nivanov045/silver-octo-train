@@ -34,13 +34,13 @@ func sendMetrics(ch chan met.Metrics) {
 		<-ticker.C
 		m := <-ch
 		for key, val := range m.Gms {
-			err := requester.New().Send("http://127.0.0.1:8080/" + "update/gauge/" + key + "/" + strconv.FormatFloat(float64(val), 'f', -1, 64))
+			err := requester.New().Send("update/gauge/" + key + "/" + strconv.FormatFloat(float64(val), 'f', -1, 64))
 			if err != nil {
 				log.Fatal(err)
 				os.Exit(1)
 			}
 		}
-		err := requester.New().Send("http://127.0.0.1:8080/" + "update/counter/PollCount/" + strconv.FormatInt(int64(m.Cms["PollCount"]), 10))
+		err := requester.New().Send("update/counter/PollCount/" + strconv.FormatInt(int64(m.Cms["PollCount"]), 10))
 		if err != nil {
 			log.Fatal(err)
 			os.Exit(1)
@@ -56,9 +56,10 @@ func main() {
 		syscall.SIGTERM,
 		syscall.SIGINT,
 		syscall.SIGQUIT)
-	var metricsVal met.Metrics
-	metricsVal.Gms = make(map[string]met.Gauge)
-	metricsVal.Cms = make(map[string]met.Counter)
+	metricsVal := met.Metrics{
+		Gms: map[string]met.Gauge{},
+		Cms: map[string]met.Counter{},
+	}
 	c := make(chan met.Metrics, 1)
 	go updateMetrics(c)
 	go sendMetrics(c)

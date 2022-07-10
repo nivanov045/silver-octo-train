@@ -8,7 +8,7 @@ type requester struct{}
 
 func (*requester) Send(a string) error {
 	client := &http.Client{}
-	request, err := http.NewRequest(http.MethodPost, a, nil)
+	request, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:8080/"+a, nil)
 	if err != nil {
 		return err
 	}
