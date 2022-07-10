@@ -1,12 +1,13 @@
 package service
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/nivanov045/silver-octo-train/cmd/server/storage"
 )
 
-func Test_service_ParseAndSet(t *testing.T) {
+func Test_service_ParseAndSave(t *testing.T) {
 	type args struct {
 		s string
 	}
@@ -84,8 +85,81 @@ func Test_service_ParseAndSet(t *testing.T) {
 	ser := service{storage.New()}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := ser.ParseAndSet(tt.args.s); (err != nil) != tt.wantErr {
-				t.Errorf("service.ParseAndSet() error = %v, wantErr %v", err, tt.wantErr)
+			if err := ser.ParseAndSave(tt.args.s); (err != nil) != tt.wantErr {
+				t.Errorf("service.ParseAndSave() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func Test_service_ParseAndGet(t *testing.T) {
+	tests := []struct {
+		name    string
+		set     string
+		args    string
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "gauge correct",
+			set:     "gauge/testSetGet1/1.23",
+			args:    "gauge/testSetGet1",
+			want:    "1.23",
+			wantErr: false,
+		},
+		{
+			name:    "counter correct",
+			set:     "counter/testSetGet2/2345",
+			args:    "counter/testSetGet2",
+			want:    "2345",
+			wantErr: false,
+		},
+		{
+			name:    "unexisted",
+			args:    "counter/testSetGet3",
+			want:    "",
+			wantErr: true,
+		},
+	}
+	ser := service{storage.New()}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ser.ParseAndSave(tt.set)
+			got, err := ser.ParseAndGet(tt.args)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("service.ParseAndGet() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("service.ParseAndGet() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_service_GetKnownMetrics(t *testing.T) {
+	tests := []struct {
+		name string
+		ser  *service
+		want []string
+		set  []string
+	}{
+		{
+			name: "correct",
+			ser: &service{
+				storage: storage.New(),
+			},
+			want: []string{"TestMetricC", "TestMetricG"},
+			set:  []string{"gauge/TestMetricG/2345.1234", "counter/TestMetricC/123"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, val := range tt.set {
+				tt.ser.ParseAndSave(val)
+			}
+			if got := tt.ser.GetKnownMetrics(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("service.GetKnownMetrics() = %v, want %v", got, tt.want)
 			}
 		})
 	}

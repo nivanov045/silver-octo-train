@@ -20,7 +20,7 @@ type service struct {
 	storage Storage
 }
 
-func (ser *service) ParseAndSet(s string) error {
+func (ser *service) ParseAndSave(s string) error {
 	ss := strings.Split(s, "/")
 	if len(ss) != 3 {
 		return errors.New("wrong query")
