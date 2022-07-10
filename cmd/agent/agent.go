@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/nivanov045/silver-octo-train/cmd/agent/metricsPerformer"
+	"github.com/nivanov045/silver-octo-train/cmd/agent/metricsperformer"
 	"github.com/nivanov045/silver-octo-train/cmd/agent/requester"
 	met "github.com/nivanov045/silver-octo-train/internal/metrics"
 )
@@ -23,7 +23,7 @@ func updateMetrics(ch chan met.Metrics) {
 	for {
 		<-ticker.C
 		m := <-ch
-		metricsPerformer.New().UpdateMetrics(m)
+		metricsperformer.New().UpdateMetrics(m)
 		ch <- m
 	}
 }

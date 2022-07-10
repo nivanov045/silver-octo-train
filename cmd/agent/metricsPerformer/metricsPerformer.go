@@ -1,4 +1,4 @@
-package metricsPerformer
+package metricsperformer
 
 import (
 	"fmt"
