@@ -26,13 +26,13 @@ func (ser *service) ParseAndSet(s string) error {
 	if ss[0] == "gauge" {
 		val, err := strconv.ParseFloat(ss[2], 64)
 		if err != nil {
-			return errors.New("can't parse gauge value")
+			return errors.New("can't parse value")
 		}
 		ser.storage.SetGaugeMetrics(ss[1], met.Gauge(val))
 	} else if ss[0] == "counter" {
 		val, err := strconv.ParseInt(ss[2], 10, 64)
 		if err != nil {
-			return errors.New("can't parse counter value")
+			return errors.New("can't parse value")
 		}
 		ser.storage.SetCounterMetrics(ss[1], met.Counter(int64(ser.storage.GetCounterMetrics(ss[1]))+val))
 	} else {

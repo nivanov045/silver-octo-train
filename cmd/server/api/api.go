@@ -31,6 +31,8 @@ func (a *api) requestMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	} else if err.Error() == "wrong metrics type" {
 		w.WriteHeader(http.StatusNotImplemented)
+	} else if err.Error() == "can't parse value" {
+		w.WriteHeader(http.StatusBadRequest)
 	} else {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusNotFound)

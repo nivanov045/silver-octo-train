@@ -73,6 +73,26 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 				statusCode: http.StatusNotImplemented,
 			},
 		},
+		{
+			name: "request invalid value",
+			args: args{
+				r: "/update/counter/testCounter/none",
+				m: http.MethodPost,
+			},
+			want: want{
+				statusCode: http.StatusBadRequest,
+			},
+		},
+		{
+			name: "request invalid value",
+			args: args{
+				r: "/update/gauge/testGauge/none",
+				m: http.MethodPost,
+			},
+			want: want{
+				statusCode: http.StatusBadRequest,
+			},
+		},
 	}
 	storage := storage.New()
 	serv := service.New(storage)
