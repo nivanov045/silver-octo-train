@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_api_requestMetricsHandler(t *testing.T) {
+func Test_api_updateMetricsHandler(t *testing.T) {
 	type args struct {
 		r string
 		m string
@@ -26,7 +26,7 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 		{
 			name: "correct counter request",
 			args: args{
-				r: "/value/counter/testCounter/100",
+				r: "/update/counter/testCounter/100",
 				m: http.MethodPost,
 			},
 			want: want{
@@ -36,7 +36,7 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 		{
 			name: "correct gauge request",
 			args: args{
-				r: "/value/gauge/testGauge/100",
+				r: "/update/gauge/testGauge/100",
 				m: http.MethodPost,
 			},
 			want: want{
@@ -46,7 +46,7 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 		{
 			name: "1-part request",
 			args: args{
-				r: "/value/counter/",
+				r: "/update/counter/",
 				m: http.MethodPost,
 			},
 			want: want{
@@ -54,19 +54,9 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 			},
 		},
 		{
-			name: "request with incorrect method",
-			args: args{
-				r: "/value/counter/",
-				m: http.MethodPut,
-			},
-			want: want{
-				statusCode: http.StatusMethodNotAllowed,
-			},
-		},
-		{
 			name: "request invalid type",
 			args: args{
-				r: "/value/unknown/testCounter/100",
+				r: "/update/unknown/testCounter/100",
 				m: http.MethodPost,
 			},
 			want: want{
@@ -76,7 +66,7 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 		{
 			name: "request invalid value",
 			args: args{
-				r: "/value/counter/testCounter/none",
+				r: "/update/counter/testCounter/none",
 				m: http.MethodPost,
 			},
 			want: want{
@@ -86,7 +76,7 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 		{
 			name: "request invalid value",
 			args: args{
-				r: "/value/gauge/testGauge/none",
+				r: "/update/gauge/testGauge/none",
 				m: http.MethodPost,
 			},
 			want: want{
@@ -101,7 +91,7 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			request := httptest.NewRequest(tt.args.m, tt.args.r, nil)
 			w := httptest.NewRecorder()
-			h := http.HandlerFunc(a.requestMetricsHandler)
+			h := http.HandlerFunc(a.updateMetricsHandler)
 			h.ServeHTTP(w, request)
 			result := w.Result()
 			defer result.Body.Close()

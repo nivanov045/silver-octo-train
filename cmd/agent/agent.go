@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -45,7 +46,7 @@ func sendMetrics(ch chan met.Metrics) {
 			log.Fatal(err)
 			os.Exit(1)
 		}
-		//fmt.Println("Reported ", m.Cms["PollCount"])
+		fmt.Println("Reported ", m.Cms["PollCount"])
 		ch <- m
 	}
 }

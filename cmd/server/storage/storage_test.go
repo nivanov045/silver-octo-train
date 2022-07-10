@@ -32,7 +32,8 @@ func Test_storage_SetGetCounterMetrics(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s.SetCounterMetrics(tt.args.name, tt.args.val)
-			if tt.args.val != s.GetCounterMetrics(tt.args.name) {
+			val, ok := s.GetCounterMetrics(tt.args.name)
+			if !ok || tt.args.val != val {
 				t.Errorf("storage.SetCounterMetrics() error with name %v, val %v", tt.args.name, tt.args.val)
 			}
 		})

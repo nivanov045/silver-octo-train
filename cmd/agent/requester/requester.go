@@ -1,6 +1,7 @@
 package requester
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -14,6 +15,7 @@ func (*requester) Send(a string) error {
 	}
 	request.Header.Add("Content-Type", "text/plain")
 	response, err := client.Do(request)
+	fmt.Println(request.URL)
 	if err != nil {
 		return err
 	}
