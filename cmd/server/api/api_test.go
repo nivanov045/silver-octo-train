@@ -84,7 +84,7 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 			h := http.HandlerFunc(a.requestMetricsHandler)
 			h.ServeHTTP(w, request)
 			result := w.Result()
-
+			defer result.Body.Close()
 			assert.Equal(t, tt.want.statusCode, result.StatusCode)
 		})
 	}

@@ -13,10 +13,11 @@ func (*requester) Send(a string) error {
 		return err
 	}
 	request.Header.Add("Content-Type", "text/plain")
-	_, err = client.Do(request)
+	response, err := client.Do(request)
 	if err != nil {
 		return err
 	}
+	defer response.Body.Close()
 	return nil
 }
 

@@ -1,4 +1,4 @@
-package metrics_performer
+package metricsPerformer
 
 import (
 	"fmt"
@@ -8,13 +8,13 @@ import (
 	met "github.com/nivanov045/silver-octo-train/internal/metrics"
 )
 
-type metrics_performer struct{}
+type metricsPerformer struct{}
 
-func New() *metrics_performer {
-	return &metrics_performer{}
+func New() *metricsPerformer {
+	return &metricsPerformer{}
 }
 
-func (*metrics_performer) UpdateMetrics(m met.Metrics) {
+func (*metricsPerformer) UpdateMetrics(m met.Metrics) {
 	var memStat runtime.MemStats
 	runtime.ReadMemStats(&memStat)
 	// Runtime metrics.
