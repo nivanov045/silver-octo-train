@@ -10,10 +10,7 @@ import (
 
 func main() {
 	storage := storage.New()
-
 	serv := service.New(storage)
-
 	myapi := api.New(serv)
-
 	log.Fatalln(myapi.Run())
 }

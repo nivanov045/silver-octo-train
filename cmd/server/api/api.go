@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -22,15 +23,17 @@ func (a *api) requestMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Only POST requests are allowed!", http.StatusMethodNotAllowed)
 		return
 	}
-	if r.Header.Get("Content-Type") != "text/plain" {
-		http.Error(w, "Only \"text/plain\" Content-Type is allowed!", http.StatusBadRequest)
-		return
-	}
+
 	w.Header().Set("content-type", "application/json")
 	s := r.URL.Path
-	s = strings.Trim(s, "/update/")
-	if a.service.ParseAndSet(s) == nil {
+	s = strings.Trim(s, "/update")
+	if err := a.service.ParseAndSet(s); err == nil {
 		w.WriteHeader(http.StatusOK)
+	} else if err.Error() == "wrong metrics type" {
+		w.WriteHeader(http.StatusNotImplemented)
+	} else {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusNotFound)
 	}
 }
 
