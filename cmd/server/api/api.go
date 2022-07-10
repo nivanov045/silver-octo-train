@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	met "github.com/nivanov045/silver-octo-train/internal/metrics"
 )
 
 type Service interface {
@@ -26,7 +28,7 @@ func (a *api) requestMetricsHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("content-type", "application/json")
 	s := r.URL.Path
-	s = strings.Trim(s, "/update")
+	s = strings.Trim(s, "/value")
 	if err := a.service.ParseAndSet(s); err == nil {
 		w.WriteHeader(http.StatusOK)
 	} else if err.Error() == "wrong metrics type" {
@@ -39,8 +41,15 @@ func (a *api) requestMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (a *api) addressHandler(w http.ResponseWriter, r *http.Request) {
+	for _, val := range met.KnownMetrics {
+		w.Write([]byte(val + "\n"))
+	}
+}
+
 func (a *api) Run() error {
-	http.HandleFunc("/update/", a.requestMetricsHandler)
+	http.HandleFunc("/value/", a.requestMetricsHandler)
+	http.HandleFunc("/", a.addressHandler)
 	return http.ListenAndServe(":8080", nil)
 }
 

@@ -26,7 +26,7 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 		{
 			name: "correct counter request",
 			args: args{
-				r: "/update/counter/testCounter/100",
+				r: "/value/counter/testCounter/100",
 				m: http.MethodPost,
 			},
 			want: want{
@@ -36,7 +36,7 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 		{
 			name: "correct gauge request",
 			args: args{
-				r: "/update/gauge/testGauge/100",
+				r: "/value/gauge/testGauge/100",
 				m: http.MethodPost,
 			},
 			want: want{
@@ -46,7 +46,7 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 		{
 			name: "1-part request",
 			args: args{
-				r: "/update/counter/",
+				r: "/value/counter/",
 				m: http.MethodPost,
 			},
 			want: want{
@@ -56,7 +56,7 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 		{
 			name: "request with incorrect method",
 			args: args{
-				r: "/update/counter/",
+				r: "/value/counter/",
 				m: http.MethodPut,
 			},
 			want: want{
@@ -66,7 +66,7 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 		{
 			name: "request invalid type",
 			args: args{
-				r: "/update/unknown/testCounter/100",
+				r: "/value/unknown/testCounter/100",
 				m: http.MethodPost,
 			},
 			want: want{
@@ -76,7 +76,7 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 		{
 			name: "request invalid value",
 			args: args{
-				r: "/update/counter/testCounter/none",
+				r: "/value/counter/testCounter/none",
 				m: http.MethodPost,
 			},
 			want: want{
@@ -86,7 +86,7 @@ func Test_api_requestMetricsHandler(t *testing.T) {
 		{
 			name: "request invalid value",
 			args: args{
-				r: "/update/gauge/testGauge/none",
+				r: "/value/gauge/testGauge/none",
 				m: http.MethodPost,
 			},
 			want: want{
