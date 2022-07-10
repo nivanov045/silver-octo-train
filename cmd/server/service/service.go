@@ -58,7 +58,7 @@ func (ser *service) ParseAndGet(s string) (string, error) {
 		if !ok {
 			return "", errors.New("no such metric")
 		}
-		return strconv.FormatFloat(float64(val), 'f', 6, 64), nil
+		return strconv.FormatFloat(float64(val), 'f', -1, 64), nil
 	} else if ss[0] == "counter" {
 		val, ok := ser.storage.GetCounterMetrics(ss[1])
 		if !ok {
