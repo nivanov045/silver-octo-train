@@ -36,11 +36,11 @@ func (ser *service) ParseAndSet(s string) error {
 		if err != nil {
 			return errors.New("can't parse value")
 		}
-		ex_val, ok := ser.storage.GetCounterMetrics(ss[1])
+		exVal, ok := ser.storage.GetCounterMetrics(ss[1])
 		if !ok {
 			ser.storage.SetCounterMetrics(ss[1], met.Counter(val))
 		} else {
-			ser.storage.SetCounterMetrics(ss[1], met.Counter(int64(ex_val)+val))
+			ser.storage.SetCounterMetrics(ss[1], met.Counter(int64(exVal)+val))
 		}
 	} else {
 		return errors.New("wrong metrics type")
