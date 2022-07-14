@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -10,7 +11,7 @@ import (
 
 	"github.com/nivanov045/silver-octo-train/cmd/agent/metricsperformer"
 	"github.com/nivanov045/silver-octo-train/cmd/agent/requester"
-	met "github.com/nivanov045/silver-octo-train/internal/metrics"
+	"github.com/nivanov045/silver-octo-train/internal/metrics"
 )
 
 const (
@@ -18,7 +19,7 @@ const (
 	reportInterval = 10 * time.Second
 )
 
-func updateMetrics(ch chan met.Metrics) {
+func updateMetrics(ch chan metrics.Metrics) {
 	ticker := time.NewTicker(pollInterval)
 	for {
 		<-ticker.C
@@ -28,24 +29,22 @@ func updateMetrics(ch chan met.Metrics) {
 	}
 }
 
-func sendMetrics(ch chan met.Metrics) {
+func sendMetrics(ch chan metrics.Metrics) {
 	ticker := time.NewTicker(reportInterval)
 	for {
 		<-ticker.C
 		m := <-ch
-		for key, val := range m.Gms {
+		for key, val := range m.GaugeMetrics {
 			err := requester.New().Send("update/gauge/" + key + "/" + strconv.FormatFloat(float64(val), 'f', -1, 64))
 			if err != nil {
 				log.Fatal(err)
-				os.Exit(1)
 			}
 		}
-		err := requester.New().Send("update/counter/PollCount/" + strconv.FormatInt(int64(m.Cms["PollCount"]), 10))
+		err := requester.New().Send("update/counter/PollCount/" + strconv.FormatInt(int64(m.CounterMetrics["PollCount"]), 10))
 		if err != nil {
 			log.Fatal(err)
-			os.Exit(1)
 		}
-		//fmt.Println("Reported ", m.Cms["PollCount"])
+		fmt.Println("Reported ", m.CounterMetrics["PollCount"])
 		ch <- m
 	}
 }
@@ -56,11 +55,11 @@ func main() {
 		syscall.SIGTERM,
 		syscall.SIGINT,
 		syscall.SIGQUIT)
-	metricsVal := met.Metrics{
-		Gms: map[string]met.Gauge{},
-		Cms: map[string]met.Counter{},
+	metricsVal := metrics.Metrics{
+		GaugeMetrics:   map[string]metrics.Gauge{},
+		CounterMetrics: map[string]metrics.Counter{},
 	}
-	c := make(chan met.Metrics, 1)
+	c := make(chan metrics.Metrics, 1)
 	go updateMetrics(c)
 	go sendMetrics(c)
 	c <- metricsVal
