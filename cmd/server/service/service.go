@@ -5,14 +5,14 @@ import (
 	"strconv"
 	"strings"
 
-	met "github.com/nivanov045/silver-octo-train/internal/metrics"
+	"github.com/nivanov045/silver-octo-train/internal/metrics"
 )
 
 type Storage interface {
-	SetGaugeMetrics(name string, val met.Gauge)
-	GetGaugeMetrics(name string) (met.Gauge, bool)
-	SetCounterMetrics(name string, val met.Counter)
-	GetCounterMetrics(name string) (met.Counter, bool)
+	SetGaugeMetrics(name string, val metrics.Gauge)
+	GetGaugeMetrics(name string) (metrics.Gauge, bool)
+	SetCounterMetrics(name string, val metrics.Counter)
+	GetCounterMetrics(name string) (metrics.Counter, bool)
 	GetKnownMetrics() []string
 }
 
@@ -20,27 +20,35 @@ type service struct {
 	storage Storage
 }
 
+const (
+	gauge   string = "gauge"
+	counter string = "counter"
+)
+
 func (ser *service) ParseAndSave(s string) error {
 	ss := strings.Split(s, "/")
 	if len(ss) != 3 {
 		return errors.New("wrong query")
 	}
-	if ss[0] == "gauge" {
-		val, err := strconv.ParseFloat(ss[2], 64)
+	metricType := ss[0]
+	metricName := ss[1]
+	metricValue := ss[2]
+	if metricType == gauge {
+		val, err := strconv.ParseFloat(metricValue, 64)
 		if err != nil {
 			return errors.New("can't parse value")
 		}
-		ser.storage.SetGaugeMetrics(ss[1], met.Gauge(val))
-	} else if ss[0] == "counter" {
-		val, err := strconv.ParseInt(ss[2], 10, 64)
+		ser.storage.SetGaugeMetrics(metricName, metrics.Gauge(val))
+	} else if metricType == counter {
+		val, err := strconv.ParseInt(metricValue, 10, 64)
 		if err != nil {
 			return errors.New("can't parse value")
 		}
-		exVal, ok := ser.storage.GetCounterMetrics(ss[1])
+		exVal, ok := ser.storage.GetCounterMetrics(metricName)
 		if !ok {
-			ser.storage.SetCounterMetrics(ss[1], met.Counter(val))
+			ser.storage.SetCounterMetrics(metricName, metrics.Counter(val))
 		} else {
-			ser.storage.SetCounterMetrics(ss[1], met.Counter(int64(exVal)+val))
+			ser.storage.SetCounterMetrics(metricName, metrics.Counter(int64(exVal)+val))
 		}
 	} else {
 		return errors.New("wrong metrics type")
@@ -53,14 +61,16 @@ func (ser *service) ParseAndGet(s string) (string, error) {
 	if len(ss) != 2 {
 		return "", errors.New("wrong query")
 	}
-	if ss[0] == "gauge" {
-		val, ok := ser.storage.GetGaugeMetrics(ss[1])
+	metricType := ss[0]
+	metricName := ss[1]
+	if metricType == gauge {
+		val, ok := ser.storage.GetGaugeMetrics(metricName)
 		if !ok {
 			return "", errors.New("no such metric")
 		}
 		return strconv.FormatFloat(float64(val), 'f', -1, 64), nil
-	} else if ss[0] == "counter" {
-		val, ok := ser.storage.GetCounterMetrics(ss[1])
+	} else if metricType == counter {
+		val, ok := ser.storage.GetCounterMetrics(metricName)
 		if !ok {
 			return "", errors.New("no such metric")
 		}

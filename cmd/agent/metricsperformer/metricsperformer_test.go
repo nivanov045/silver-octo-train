@@ -3,7 +3,7 @@ package metricsperformer
 import (
 	"testing"
 
-	met "github.com/nivanov045/silver-octo-train/internal/metrics"
+	"github.com/nivanov045/silver-octo-train/internal/metrics"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,21 +17,21 @@ func Test_metricsPerformer_UpdateMetrics(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := met.Metrics{
-				Gms: map[string]met.Gauge{},
-				Cms: map[string]met.Counter{},
+			m := metrics.Metrics{
+				GaugeMetrics:   map[string]metrics.Gauge{},
+				CounterMetrics: map[string]metrics.Counter{},
 			}
 			mp := metricsPerformer{}
-			assert.Equal(t, len(m.Gms), 0)
-			assert.Equal(t, len(m.Cms), 0)
+			assert.Equal(t, len(m.GaugeMetrics), 0)
+			assert.Equal(t, len(m.CounterMetrics), 0)
 			mp.UpdateMetrics(m)
-			assert.Equal(t, len(m.Gms), 27)
-			assert.Equal(t, len(m.Cms), 1)
-			assert.Equal(t, m.Cms["PollCount"], met.Counter(1))
+			assert.Equal(t, len(m.GaugeMetrics), 27)
+			assert.Equal(t, len(m.CounterMetrics), 1)
+			assert.Equal(t, m.CounterMetrics["PollCount"], metrics.Counter(1))
 			mp.UpdateMetrics(m)
-			assert.Equal(t, m.Cms["PollCount"], met.Counter(2))
+			assert.Equal(t, m.CounterMetrics["PollCount"], metrics.Counter(2))
 			mp.UpdateMetrics(m)
-			assert.Equal(t, m.Cms["PollCount"], met.Counter(3))
+			assert.Equal(t, m.CounterMetrics["PollCount"], metrics.Counter(3))
 		})
 	}
 }

@@ -3,14 +3,14 @@ package storage
 import (
 	"testing"
 
-	met "github.com/nivanov045/silver-octo-train/internal/metrics"
+	"github.com/nivanov045/silver-octo-train/internal/metrics"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_storage_SetGetCounterMetrics(t *testing.T) {
 	type args struct {
 		name string
-		val  met.Counter
+		val  metrics.Counter
 	}
 	tests := []struct {
 		name string
@@ -25,9 +25,9 @@ func Test_storage_SetGetCounterMetrics(t *testing.T) {
 		},
 	}
 	s := storage{
-		M: met.Metrics{
-			Gms: map[string]met.Gauge{},
-			Cms: map[string]met.Counter{},
+		Metrics: metrics.Metrics{
+			GaugeMetrics:   map[string]metrics.Gauge{},
+			CounterMetrics: map[string]metrics.Counter{},
 		},
 	}
 	for _, tt := range tests {
@@ -44,7 +44,7 @@ func Test_storage_SetGetCounterMetrics(t *testing.T) {
 func Test_storage_SetGetGaugeMetrics(t *testing.T) {
 	type args struct {
 		name string
-		val  met.Gauge
+		val  metrics.Gauge
 	}
 	tests := []struct {
 		name string
@@ -59,9 +59,9 @@ func Test_storage_SetGetGaugeMetrics(t *testing.T) {
 		},
 	}
 	s := storage{
-		M: met.Metrics{
-			Gms: map[string]met.Gauge{},
-			Cms: map[string]met.Counter{},
+		Metrics: metrics.Metrics{
+			GaugeMetrics:   map[string]metrics.Gauge{},
+			CounterMetrics: map[string]metrics.Counter{},
 		},
 	}
 	for _, tt := range tests {
@@ -84,9 +84,9 @@ func Test_storage_GetKnownMetrics(t *testing.T) {
 		{
 			name: "no metrics",
 			s: &storage{
-				M: met.Metrics{
-					Gms: map[string]met.Gauge{},
-					Cms: map[string]met.Counter{},
+				Metrics: metrics.Metrics{
+					GaugeMetrics:   map[string]metrics.Gauge{},
+					CounterMetrics: map[string]metrics.Counter{},
 				},
 			},
 			want: []string(nil),
@@ -94,9 +94,9 @@ func Test_storage_GetKnownMetrics(t *testing.T) {
 		{
 			name: "one metric",
 			s: &storage{
-				M: met.Metrics{
-					Gms: map[string]met.Gauge{"TestMetric": 0.0},
-					Cms: map[string]met.Counter{},
+				Metrics: metrics.Metrics{
+					GaugeMetrics:   map[string]metrics.Gauge{"TestMetric": 0.0},
+					CounterMetrics: map[string]metrics.Counter{},
 				},
 			},
 			want: []string{"TestMetric"},
@@ -104,9 +104,9 @@ func Test_storage_GetKnownMetrics(t *testing.T) {
 		{
 			name: "several metrics",
 			s: &storage{
-				M: met.Metrics{
-					Gms: map[string]met.Gauge{"TestMetricG": 0.5},
-					Cms: map[string]met.Counter{"TestMetricC": 10},
+				Metrics: metrics.Metrics{
+					GaugeMetrics:   map[string]metrics.Gauge{"TestMetricG": 0.5},
+					CounterMetrics: map[string]metrics.Counter{"TestMetricC": 10},
 				},
 			},
 			want: []string{"TestMetricC", "TestMetricG"},

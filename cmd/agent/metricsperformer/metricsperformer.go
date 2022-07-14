@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"runtime"
 
-	met "github.com/nivanov045/silver-octo-train/internal/metrics"
+	"github.com/nivanov045/silver-octo-train/internal/metrics"
 )
 
 type metricsPerformer struct{}
@@ -14,68 +14,68 @@ func New() *metricsPerformer {
 	return &metricsPerformer{}
 }
 
-func (*metricsPerformer) UpdateMetrics(m met.Metrics) {
+func (*metricsPerformer) UpdateMetrics(m metrics.Metrics) {
 	var memStat runtime.MemStats
 	runtime.ReadMemStats(&memStat)
-	for _, val := range met.KnownMetrics {
+	for _, val := range metrics.KnownMetrics {
 		switch val {
 		case "Alloc":
-			m.Gms["Alloc"] = met.Gauge(memStat.Alloc)
+			m.GaugeMetrics["Alloc"] = metrics.Gauge(memStat.Alloc)
 		case "BuckHashSys":
-			m.Gms["BuckHashSys"] = met.Gauge(memStat.BuckHashSys)
+			m.GaugeMetrics["BuckHashSys"] = metrics.Gauge(memStat.BuckHashSys)
 		case "Frees":
-			m.Gms["Frees"] = met.Gauge(memStat.Frees)
+			m.GaugeMetrics["Frees"] = metrics.Gauge(memStat.Frees)
 		case "GCCPUFraction":
-			m.Gms["GCCPUFraction"] = met.Gauge(memStat.GCCPUFraction)
+			m.GaugeMetrics["GCCPUFraction"] = metrics.Gauge(memStat.GCCPUFraction)
 		case "GCSys":
-			m.Gms["GCSys"] = met.Gauge(memStat.GCSys)
+			m.GaugeMetrics["GCSys"] = metrics.Gauge(memStat.GCSys)
 		case "HeapAlloc":
-			m.Gms["HeapAlloc"] = met.Gauge(memStat.HeapAlloc)
+			m.GaugeMetrics["HeapAlloc"] = metrics.Gauge(memStat.HeapAlloc)
 		case "HeapIdle":
-			m.Gms["HeapIdle"] = met.Gauge(memStat.HeapIdle)
+			m.GaugeMetrics["HeapIdle"] = metrics.Gauge(memStat.HeapIdle)
 		case "HeapInuse":
-			m.Gms["HeapInuse"] = met.Gauge(memStat.HeapInuse)
+			m.GaugeMetrics["HeapInuse"] = metrics.Gauge(memStat.HeapInuse)
 		case "HeapObjects":
-			m.Gms["HeapObjects"] = met.Gauge(memStat.HeapObjects)
+			m.GaugeMetrics["HeapObjects"] = metrics.Gauge(memStat.HeapObjects)
 		case "HeapReleased":
-			m.Gms["HeapReleased"] = met.Gauge(memStat.HeapReleased)
+			m.GaugeMetrics["HeapReleased"] = metrics.Gauge(memStat.HeapReleased)
 		case "HeapSys":
-			m.Gms["HeapSys"] = met.Gauge(memStat.HeapSys)
+			m.GaugeMetrics["HeapSys"] = metrics.Gauge(memStat.HeapSys)
 		case "LastGC":
-			m.Gms["LastGC"] = met.Gauge(memStat.LastGC)
+			m.GaugeMetrics["LastGC"] = metrics.Gauge(memStat.LastGC)
 		case "Lookups":
-			m.Gms["Lookups"] = met.Gauge(memStat.Lookups)
+			m.GaugeMetrics["Lookups"] = metrics.Gauge(memStat.Lookups)
 		case "MCacheInuse":
-			m.Gms["MCacheInuse"] = met.Gauge(memStat.MCacheInuse)
+			m.GaugeMetrics["MCacheInuse"] = metrics.Gauge(memStat.MCacheInuse)
 		case "MSpanInuse":
-			m.Gms["MSpanInuse"] = met.Gauge(memStat.MSpanInuse)
+			m.GaugeMetrics["MSpanInuse"] = metrics.Gauge(memStat.MSpanInuse)
 		case "MSpanSys":
-			m.Gms["MSpanSys"] = met.Gauge(memStat.MSpanSys)
+			m.GaugeMetrics["MSpanSys"] = metrics.Gauge(memStat.MSpanSys)
 		case "Mallocs":
-			m.Gms["Mallocs"] = met.Gauge(memStat.Mallocs)
+			m.GaugeMetrics["Mallocs"] = metrics.Gauge(memStat.Mallocs)
 		case "NextGC":
-			m.Gms["NextGC"] = met.Gauge(memStat.NextGC)
+			m.GaugeMetrics["NextGC"] = metrics.Gauge(memStat.NextGC)
 		case "NumForcedGC":
-			m.Gms["NumForcedGC"] = met.Gauge(memStat.NumForcedGC)
+			m.GaugeMetrics["NumForcedGC"] = metrics.Gauge(memStat.NumForcedGC)
 		case "NumGC":
-			m.Gms["NumGC"] = met.Gauge(memStat.NumGC)
+			m.GaugeMetrics["NumGC"] = metrics.Gauge(memStat.NumGC)
 		case "OtherSys":
-			m.Gms["OtherSys"] = met.Gauge(memStat.OtherSys)
+			m.GaugeMetrics["OtherSys"] = metrics.Gauge(memStat.OtherSys)
 		case "PauseTotalNs":
-			m.Gms["PauseTotalNs"] = met.Gauge(memStat.PauseTotalNs)
+			m.GaugeMetrics["PauseTotalNs"] = metrics.Gauge(memStat.PauseTotalNs)
 		case "StackInuse":
-			m.Gms["StackInuse"] = met.Gauge(memStat.StackInuse)
+			m.GaugeMetrics["StackInuse"] = metrics.Gauge(memStat.StackInuse)
 		case "StackSys":
-			m.Gms["StackSys"] = met.Gauge(memStat.StackSys)
+			m.GaugeMetrics["StackSys"] = metrics.Gauge(memStat.StackSys)
 		case "Sys":
-			m.Gms["Sys"] = met.Gauge(memStat.Sys)
+			m.GaugeMetrics["Sys"] = metrics.Gauge(memStat.Sys)
 		case "TotalAlloc":
-			m.Gms["TotalAlloc"] = met.Gauge(memStat.TotalAlloc)
+			m.GaugeMetrics["TotalAlloc"] = metrics.Gauge(memStat.TotalAlloc)
 		case "RandomValue":
-			m.Gms["RandomValue"] = met.Gauge(rand.Float64())
+			m.GaugeMetrics["RandomValue"] = metrics.Gauge(rand.Float64())
 		case "PollCount":
-			m.Cms["PollCount"]++
-			fmt.Println("Updated ", m.Cms["PollCount"])
+			m.CounterMetrics["PollCount"]++
+			fmt.Println("Updated ", m.CounterMetrics["PollCount"])
 		}
 	}
 }
