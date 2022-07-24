@@ -58,6 +58,7 @@ func (a *api) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	if val, err := a.service.ParseAndGet(respBody); err == nil {
 		fmt.Println("StatusOK")
 		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
 		w.Write(val)
 	} else if err.Error() == "wrong metrics type" {
 		fmt.Println("StatusNotImplemented")
