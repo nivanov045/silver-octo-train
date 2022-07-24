@@ -23,7 +23,7 @@ func (*requester) Send(a []byte) error {
 	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println("err != nil 2 with ", err)
-		//return err
+		return err
 	}
 	defer response.Body.Close()
 	return nil

@@ -30,11 +30,12 @@ func (a *metricsagent) sendMetrics() {
 	for {
 		<-ticker.C
 		for key, val := range a.Metrics.GaugeMetrics {
+			asfloat := float64(val)
 			metricForSend := metrics.MetricsInterface{
 				ID:    key,
 				MType: "gauge",
 				Delta: nil,
-				Value: (*float64)(&val),
+				Value: &asfloat,
 			}
 			marshalled, err := json.Marshal(metricForSend)
 			if err != nil {
@@ -48,10 +49,11 @@ func (a *metricsagent) sendMetrics() {
 			}
 		}
 		pc := a.Metrics.CounterMetrics["PollCount"]
+		asint := int64(pc)
 		metricForSend := metrics.MetricsInterface{
 			ID:    "PollCount",
 			MType: "counter",
-			Delta: (*int64)(&pc),
+			Delta: &asint,
 			Value: nil,
 		}
 		marshalled, err := json.Marshal(metricForSend)
