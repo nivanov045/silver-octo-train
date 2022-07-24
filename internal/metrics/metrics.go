@@ -30,6 +30,7 @@ var KnownMetrics = [...]string{
 	"LastGC",
 	"Lookups",
 	"MCacheInuse",
+	"MCacheSys",
 	"MSpanInuse",
 	"MSpanSys",
 	"Mallocs",
