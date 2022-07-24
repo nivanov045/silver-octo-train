@@ -17,6 +17,7 @@ func (*requester) Send(a string) error {
 	request.Header.Add("Content-Type", "application/json")
 	response, err := client.Do(request)
 	fmt.Println(request.URL)
+	fmt.Println(a)
 	if err != nil {
 		return err
 	}
