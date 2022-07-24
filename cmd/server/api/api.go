@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"io/ioutil"
@@ -22,22 +23,26 @@ func New(service Service) *api {
 }
 
 func (a *api) updateMetricsHandler(w http.ResponseWriter, r *http.Request) {
-	//fmt.Println("updateMetricsHandler")
+	fmt.Println("updateMetricsHandler")
 	w.Header().Set("content-type", "application/json")
 	respBody, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
+		fmt.Println("StatusNotFound")
 		w.WriteHeader(http.StatusNotFound)
 	}
 	if err := a.service.ParseAndSave(string(respBody)); err == nil {
+		fmt.Println("StatusOK")
 		w.WriteHeader(http.StatusOK)
 	} else if err.Error() == "wrong metrics type" {
+		fmt.Println("StatusNotImplemented")
 		w.WriteHeader(http.StatusNotImplemented)
 	} else if err.Error() == "can't parse value" {
+		fmt.Println("StatusBadRequest")
 		w.WriteHeader(http.StatusBadRequest)
 	} else {
+		fmt.Println("StatusNotFound")
 		w.WriteHeader(http.StatusNotFound)
-		//fmt.Println(err.Error())
 	}
 }
 
@@ -47,16 +52,21 @@ func (a *api) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	respBody, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
+		fmt.Println("StatusNotFound")
 		w.WriteHeader(http.StatusNotFound)
 	}
 	if val, err := a.service.ParseAndGet(string(respBody)); err == nil {
+		fmt.Println("StatusOK")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(val))
 	} else if err.Error() == "wrong metrics type" {
+		fmt.Println("StatusNotImplemented")
 		w.WriteHeader(http.StatusNotImplemented)
 	} else if err.Error() == "no such metric" {
+		fmt.Println("StatusNotFound")
 		w.WriteHeader(http.StatusNotFound)
 	} else {
+		fmt.Println("StatusBadRequest")
 		w.WriteHeader(http.StatusBadRequest)
 	}
 }
