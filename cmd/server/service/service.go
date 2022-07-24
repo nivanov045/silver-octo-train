@@ -34,6 +34,7 @@ func (ser *service) ParseAndSave(s string) error {
 	}
 	metricType := m.MType
 	metricName := m.ID
+	fmt.Println("ParseAndSave: ", metricName)
 	if metricType == gauge {
 		fmt.Println("gauge")
 		value := m.Value
