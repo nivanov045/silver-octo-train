@@ -17,6 +17,7 @@ func (*requester) Send(a []byte) error {
 		return err
 	}
 	request.Header.Add("Content-Type", "application/json")
+	request.Close = true
 	response, err := client.Do(request)
 	fmt.Println(request.URL)
 	fmt.Println(string(a))
