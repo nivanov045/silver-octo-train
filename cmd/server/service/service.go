@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/nivanov045/silver-octo-train/internal/metrics"
+	"sync"
 )
 
 type Storage interface {
@@ -17,6 +18,7 @@ type Storage interface {
 
 type service struct {
 	storage Storage
+	mu      sync.Mutex
 }
 
 const (
@@ -25,6 +27,8 @@ const (
 )
 
 func (ser *service) ParseAndSave(s []byte) error {
+	ser.mu.Lock() // Блокирует мьютекс
+	defer ser.mu.Unlock()
 	fmt.Println("ParseAndSave")
 	var m metrics.MetricsInterface
 	err := json.Unmarshal(s, &m)
