@@ -10,7 +10,7 @@ import (
 
 type Service interface {
 	ParseAndSave([]byte) error
-	ParseAndGet([]byte) (string, error)
+	ParseAndGet([]byte) ([]byte, error)
 	GetKnownMetrics() []string
 }
 
@@ -58,7 +58,7 @@ func (a *api) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	if val, err := a.service.ParseAndGet(respBody); err == nil {
 		fmt.Println("StatusOK")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(val))
+		w.Write(val)
 	} else if err.Error() == "wrong metrics type" {
 		fmt.Println("StatusNotImplemented")
 		w.WriteHeader(http.StatusNotImplemented)

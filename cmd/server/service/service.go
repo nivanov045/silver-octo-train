@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/nivanov045/silver-octo-train/internal/metrics"
-	"sync"
 )
 
 type Storage interface {
@@ -18,7 +17,6 @@ type Storage interface {
 
 type service struct {
 	storage Storage
-	mu      sync.Mutex
 }
 
 const (
@@ -27,13 +25,11 @@ const (
 )
 
 func (ser *service) ParseAndSave(s []byte) error {
-	ser.mu.Lock() // Блокирует мьютекс
-	defer ser.mu.Unlock()
 	fmt.Println("ParseAndSave")
 	var m metrics.MetricsInterface
 	err := json.Unmarshal(s, &m)
 	if err != nil {
-		fmt.Println("wrong query")
+		fmt.Println("wrong query: ", string(s))
 		return errors.New("wrong query")
 	}
 	metricType := m.MType
@@ -69,13 +65,13 @@ func (ser *service) ParseAndSave(s []byte) error {
 	return nil
 }
 
-func (ser *service) ParseAndGet(s []byte) (string, error) {
+func (ser *service) ParseAndGet(s []byte) ([]byte, error) {
 	fmt.Println("ParseAndGet")
 	var m metrics.MetricsInterface
 	err := json.Unmarshal(s, &m)
 	if err != nil {
-		fmt.Println("wrong query")
-		return "", errors.New("wrong query")
+		fmt.Println("wrong query: ", string(s))
+		return nil, errors.New("wrong query")
 	}
 	metricType := m.MType
 	metricName := m.ID
@@ -85,33 +81,33 @@ func (ser *service) ParseAndGet(s []byte) (string, error) {
 		val, ok := ser.storage.GetGaugeMetrics(metricName)
 		if !ok {
 			fmt.Println("no such metric")
-			return "", errors.New("no such metric")
+			return nil, errors.New("no such metric")
 		}
 		asFloat := float64(val)
 		m.Value = &asFloat
 		marshal, err := json.Marshal(m)
 		if err != nil {
 			fmt.Println("err != nil")
-			return "", err
+			return nil, err
 		}
-		return string(marshal), nil
+		return marshal, nil
 	} else if metricType == counter {
 		fmt.Println("counter")
 		val, ok := ser.storage.GetCounterMetrics(metricName)
 		if !ok {
 			fmt.Println("no such metric")
-			return "", errors.New("no such metric")
+			return nil, errors.New("no such metric")
 		}
 		asint := int64(val)
 		m.Delta = &asint
 		marshal, err := json.Marshal(m)
 		if err != nil {
 			fmt.Println("err != nil")
-			return "", err
+			return nil, err
 		}
-		return string(marshal), nil
+		return marshal, nil
 	}
-	return "", errors.New("wrong metrics type")
+	return nil, errors.New("wrong metrics type")
 }
 
 func (ser *service) GetKnownMetrics() []string {
