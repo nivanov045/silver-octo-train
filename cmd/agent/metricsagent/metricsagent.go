@@ -39,7 +39,7 @@ func (a *metricsagent) sendMetrics() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			err = requester.New().Send(string(marshalled))
+			err = requester.New().Send(marshalled)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -55,7 +55,7 @@ func (a *metricsagent) sendMetrics() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = requester.New().Send(string(marshalled))
+		err = requester.New().Send(marshalled)
 		if err != nil {
 			log.Fatal(err)
 		}
