@@ -9,8 +9,8 @@ import (
 )
 
 type Service interface {
-	ParseAndSave(data string) error
-	ParseAndGet(data string) (string, error)
+	ParseAndSave([]byte) error
+	ParseAndGet([]byte) (string, error)
 	GetKnownMetrics() []string
 }
 
@@ -31,7 +31,7 @@ func (a *api) updateMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("StatusNotFound")
 		w.WriteHeader(http.StatusNotFound)
 	}
-	if err := a.service.ParseAndSave(string(respBody)); err == nil {
+	if err := a.service.ParseAndSave(respBody); err == nil {
 		fmt.Println("StatusOK")
 		w.WriteHeader(http.StatusOK)
 	} else if err.Error() == "wrong metrics type" {
@@ -55,7 +55,7 @@ func (a *api) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("StatusNotFound")
 		w.WriteHeader(http.StatusNotFound)
 	}
-	if val, err := a.service.ParseAndGet(string(respBody)); err == nil {
+	if val, err := a.service.ParseAndGet(respBody); err == nil {
 		fmt.Println("StatusOK")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(val))

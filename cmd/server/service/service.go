@@ -24,10 +24,10 @@ const (
 	counter string = "counter"
 )
 
-func (ser *service) ParseAndSave(s string) error {
+func (ser *service) ParseAndSave(s []byte) error {
 	fmt.Println("ParseAndSave")
 	var m metrics.MetricsInterface
-	err := json.Unmarshal([]byte(s), &m)
+	err := json.Unmarshal(s, &m)
 	if err != nil {
 		fmt.Println("wrong query")
 		return errors.New("wrong query")
@@ -65,10 +65,10 @@ func (ser *service) ParseAndSave(s string) error {
 	return nil
 }
 
-func (ser *service) ParseAndGet(s string) (string, error) {
+func (ser *service) ParseAndGet(s []byte) (string, error) {
 	fmt.Println("ParseAndGet")
 	var m metrics.MetricsInterface
-	err := json.Unmarshal([]byte(s), &m)
+	err := json.Unmarshal(s, &m)
 	if err != nil {
 		fmt.Println("wrong query")
 		return "", errors.New("wrong query")
