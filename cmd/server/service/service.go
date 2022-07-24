@@ -54,7 +54,7 @@ func (ser *service) ParseAndGet(s string) (string, error) {
 	var m metrics.MetricsInterface
 	err := json.Unmarshal([]byte(s), &m)
 	if err != nil {
-		errors.New("wrong query")
+		return "", errors.New("wrong query")
 	}
 	metricType := m.MType
 	fmt.Println("metricType: ", metricType)

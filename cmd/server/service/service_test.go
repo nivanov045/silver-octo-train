@@ -58,6 +58,7 @@ func Test_service_ParseAndSave(t *testing.T) {
 			marshal, err := json.Marshal(v)
 			assert.NoError(t, err)
 			err = ser.ParseAndSave(string(marshal))
+			assert.NoError(t, err)
 		})
 	}
 }
@@ -116,6 +117,7 @@ func Test_service_ParseAndGet(t *testing.T) {
 				Delta: nil,
 				Value: nil,
 			})
+			assert.NoError(t, err)
 			got, err := ser.ParseAndGet(string(marshalGet))
 			assert.NoError(t, err)
 			assert.Equal(t, got, string(marshal))

@@ -2,11 +2,10 @@ package api
 
 import (
 	"fmt"
-	"net/http"
-	"strings"
-
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
+	"io/ioutil"
+	"net/http"
 )
 
 type Service interface {
@@ -26,9 +25,12 @@ func New(service Service) *api {
 func (a *api) updateMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("updateMetricsHandler")
 	w.Header().Set("content-type", "application/json")
-	s := r.URL.Path
-	s = strings.Trim(s, "/update")
-	if err := a.service.ParseAndSave(s); err == nil {
+	respBody, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	if err := a.service.ParseAndSave(string(respBody)); err == nil {
 		w.WriteHeader(http.StatusOK)
 	} else if err.Error() == "wrong metrics type" {
 		w.WriteHeader(http.StatusNotImplemented)
@@ -43,9 +45,12 @@ func (a *api) updateMetricsHandler(w http.ResponseWriter, r *http.Request) {
 func (a *api) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("getMetricsHandler")
 	w.Header().Set("content-type", "application/json")
-	s := r.URL.Path
-	s = strings.Trim(s, "/value")
-	if val, err := a.service.ParseAndGet(s); err == nil {
+	respBody, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	if val, err := a.service.ParseAndGet(string(respBody)); err == nil {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(val))
 	} else if err.Error() == "wrong metrics type" {
@@ -72,9 +77,9 @@ func (a *api) Run() error {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	r.Post("/update/{body}", a.updateMetricsHandler)
+	r.Post("/update/", a.updateMetricsHandler)
 	r.Get("/", a.rootHandler)
-	r.Post("/value/{body}", a.getMetricsHandler)
+	r.Post("/value/", a.getMetricsHandler)
 	return http.ListenAndServe(":8080", r)
 }
 

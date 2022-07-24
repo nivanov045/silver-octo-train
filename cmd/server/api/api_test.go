@@ -80,7 +80,7 @@ func Test_api_updateMetricsHandler(t *testing.T) {
 				Value: &tt.args.valueFloat,
 			})
 			assert.NoError(t, err)
-			request := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/update/"+string(marshal), nil)
+			request := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/update/", strings.NewReader(string(marshal)))
 			w := httptest.NewRecorder()
 			h := http.HandlerFunc(a.updateMetricsHandler)
 			h.ServeHTTP(w, request)
@@ -112,11 +112,11 @@ func Test_api_getMetricsHandler(t *testing.T) {
 				Value: nil,
 			})
 			assert.NoError(t, err)
-			requestSend := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/update/"+string(marshal), nil)
+			requestSend := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/update/", strings.NewReader(string(marshal)))
 			wSend := httptest.NewRecorder()
 			hSend := http.HandlerFunc(a.updateMetricsHandler)
 			hSend.ServeHTTP(wSend, requestSend)
-			request := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/value/"+string(marshal), nil)
+			request := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/value/", strings.NewReader(string(marshal)))
 			w := httptest.NewRecorder()
 			h := http.HandlerFunc(a.getMetricsHandler)
 			h.ServeHTTP(w, request)
@@ -157,7 +157,7 @@ func Test_api_rootHandler(t *testing.T) {
 				Value: nil,
 			})
 			assert.NoError(t, err)
-			requestSend := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/update/"+string(marshal), nil)
+			requestSend := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/update/", strings.NewReader(string(marshal)))
 			wSend := httptest.NewRecorder()
 			hSend := http.HandlerFunc(a.updateMetricsHandler)
 			hSend.ServeHTTP(wSend, requestSend)
