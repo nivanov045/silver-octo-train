@@ -35,9 +35,16 @@ func (ser *service) ParseAndSave(s string) error {
 	metricType := m.MType
 	metricName := m.ID
 	if metricType == gauge {
-		ser.storage.SetGaugeMetrics(metricName, metrics.Gauge(*m.Value))
+		value := m.Value
+		if value == nil {
+			return errors.New("wrong query")
+		}
+		ser.storage.SetGaugeMetrics(metricName, metrics.Gauge(*value))
 	} else if metricType == counter {
 		exVal, ok := ser.storage.GetCounterMetrics(metricName)
+		if m.Delta == nil {
+			return errors.New("wrong query")
+		}
 		value := *m.Delta
 		if !ok {
 			ser.storage.SetCounterMetrics(metricName, metrics.Counter(value))
