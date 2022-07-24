@@ -1,7 +1,6 @@
 package metricsperformer
 
 import (
-	"fmt"
 	"math/rand"
 	"runtime"
 
@@ -75,7 +74,7 @@ func (*metricsPerformer) UpdateMetrics(m metrics.Metrics) {
 			m.GaugeMetrics["RandomValue"] = metrics.Gauge(rand.Float64())
 		case "PollCount":
 			m.CounterMetrics["PollCount"]++
-			fmt.Println("Updated ", m.CounterMetrics["PollCount"])
+			//fmt.Println("Updated ", m.CounterMetrics["PollCount"])
 		}
 	}
 }

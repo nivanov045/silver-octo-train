@@ -3,8 +3,6 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-
 	"github.com/nivanov045/silver-octo-train/internal/metrics"
 )
 
@@ -29,7 +27,7 @@ func (ser *service) ParseAndSave(s string) error {
 	var m metrics.MetricsInterface
 	err := json.Unmarshal([]byte(s), &m)
 	if err != nil {
-		fmt.Println(err.Error())
+		//fmt.Println(err.Error())
 		return errors.New("wrong query")
 	}
 	metricType := m.MType
@@ -64,9 +62,9 @@ func (ser *service) ParseAndGet(s string) (string, error) {
 		return "", errors.New("wrong query")
 	}
 	metricType := m.MType
-	fmt.Println("metricType: ", metricType)
+	//fmt.Println("metricType: ", metricType)
 	metricName := m.ID
-	fmt.Println("metricaName: ", metricName)
+	//fmt.Println("metricaName: ", metricName)
 	if metricType == gauge {
 		val, ok := ser.storage.GetGaugeMetrics(metricName)
 		if !ok {

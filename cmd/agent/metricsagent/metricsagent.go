@@ -2,7 +2,6 @@ package metricsagent
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 
@@ -60,7 +59,7 @@ func (a *metricsagent) sendMetrics() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println("Reported ", a.Metrics.CounterMetrics["PollCount"])
+		//fmt.Println("Reported ", a.Metrics.CounterMetrics["PollCount"])
 	}
 }
 

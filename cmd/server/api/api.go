@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"io/ioutil"
@@ -23,7 +22,7 @@ func New(service Service) *api {
 }
 
 func (a *api) updateMetricsHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("updateMetricsHandler")
+	//fmt.Println("updateMetricsHandler")
 	w.Header().Set("content-type", "application/json")
 	respBody, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
@@ -38,12 +37,12 @@ func (a *api) updateMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Println(err.Error())
+		//fmt.Println(err.Error())
 	}
 }
 
 func (a *api) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("getMetricsHandler")
+	//fmt.Println("getMetricsHandler")
 	w.Header().Set("content-type", "application/json")
 	respBody, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
