@@ -75,6 +75,7 @@ func (ser *service) ParseAndGet(s []byte) (string, error) {
 	}
 	metricType := m.MType
 	metricName := m.ID
+	fmt.Println("ParseAndGet: ", metricName)
 	if metricType == gauge {
 		fmt.Println("gauge")
 		val, ok := ser.storage.GetGaugeMetrics(metricName)
