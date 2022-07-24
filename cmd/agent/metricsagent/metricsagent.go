@@ -1,9 +1,9 @@
 package metricsagent
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/nivanov045/silver-octo-train/cmd/agent/metricsperformer"
@@ -30,12 +30,33 @@ func (a *metricsagent) sendMetrics() {
 	for {
 		<-ticker.C
 		for key, val := range a.Metrics.GaugeMetrics {
-			err := requester.New().Send("update/gauge/" + key + "/" + strconv.FormatFloat(float64(val), 'f', -1, 64))
+			metricForSend := metrics.MetricsInterface{
+				ID:    key,
+				MType: "gauge",
+				Delta: nil,
+				Value: (*float64)(&val),
+			}
+			marshalled, err := json.Marshal(metricForSend)
+			if err != nil {
+				log.Fatal(err)
+			}
+			err = requester.New().Send("update/" + string(marshalled))
 			if err != nil {
 				log.Fatal(err)
 			}
 		}
-		err := requester.New().Send("update/counter/PollCount/" + strconv.FormatInt(int64(a.Metrics.CounterMetrics["PollCount"]), 10))
+		pc := a.Metrics.CounterMetrics["PollCount"]
+		metricForSend := metrics.MetricsInterface{
+			ID:    "PollCount",
+			MType: "counter",
+			Delta: (*int64)(&pc),
+			Value: nil,
+		}
+		marshalled, err := json.Marshal(metricForSend)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = requester.New().Send("update/" + string(marshalled))
 		if err != nil {
 			log.Fatal(err)
 		}

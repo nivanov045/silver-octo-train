@@ -1,9 +1,9 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
-	"strconv"
-	"strings"
+	"fmt"
 
 	"github.com/nivanov045/silver-octo-train/internal/metrics"
 )
@@ -26,29 +26,23 @@ const (
 )
 
 func (ser *service) ParseAndSave(s string) error {
-	ss := strings.Split(s, "/")
-	if len(ss) != 3 {
+	var m metrics.MetricsInterface
+	err := json.Unmarshal([]byte(s), &m)
+	if err != nil {
+		fmt.Println(err.Error())
 		return errors.New("wrong query")
 	}
-	metricType := ss[0]
-	metricName := ss[1]
-	metricValue := ss[2]
+	metricType := m.MType
+	metricName := m.ID
 	if metricType == gauge {
-		val, err := strconv.ParseFloat(metricValue, 64)
-		if err != nil {
-			return errors.New("can't parse value")
-		}
-		ser.storage.SetGaugeMetrics(metricName, metrics.Gauge(val))
+		ser.storage.SetGaugeMetrics(metricName, metrics.Gauge(*m.Value))
 	} else if metricType == counter {
-		val, err := strconv.ParseInt(metricValue, 10, 64)
-		if err != nil {
-			return errors.New("can't parse value")
-		}
 		exVal, ok := ser.storage.GetCounterMetrics(metricName)
+		value := *m.Delta
 		if !ok {
-			ser.storage.SetCounterMetrics(metricName, metrics.Counter(val))
+			ser.storage.SetCounterMetrics(metricName, metrics.Counter(value))
 		} else {
-			ser.storage.SetCounterMetrics(metricName, metrics.Counter(int64(exVal)+val))
+			ser.storage.SetCounterMetrics(metricName, metrics.Counter(int64(exVal)+value))
 		}
 	} else {
 		return errors.New("wrong metrics type")
@@ -57,25 +51,39 @@ func (ser *service) ParseAndSave(s string) error {
 }
 
 func (ser *service) ParseAndGet(s string) (string, error) {
-	ss := strings.Split(s, "/")
-	if len(ss) != 2 {
-		return "", errors.New("wrong query")
+	var m metrics.MetricsInterface
+	err := json.Unmarshal([]byte(s), &m)
+	if err != nil {
+		errors.New("wrong query")
 	}
-	metricType := ss[0]
-	metricName := ss[1]
+	metricType := m.MType
+	fmt.Println("metricType: ", metricType)
+	metricName := m.ID
+	fmt.Println("metricaName: ", metricName)
 	if metricType == gauge {
 		val, ok := ser.storage.GetGaugeMetrics(metricName)
 		if !ok {
 			return "", errors.New("no such metric")
 		}
-		return strconv.FormatFloat(float64(val), 'f', -1, 64), nil
+		asFloat := float64(val)
+		m.Value = &asFloat
+		marshal, err := json.Marshal(m)
+		if err != nil {
+			return "", err
+		}
+		return string(marshal), nil
 	} else if metricType == counter {
 		val, ok := ser.storage.GetCounterMetrics(metricName)
 		if !ok {
 			return "", errors.New("no such metric")
 		}
 		asint := int64(val)
-		return strconv.Itoa(int(asint)), nil
+		m.Delta = &asint
+		marshal, err := json.Marshal(m)
+		if err != nil {
+			return "", err
+		}
+		return string(marshal), nil
 	}
 	return "", errors.New("wrong metrics type")
 }

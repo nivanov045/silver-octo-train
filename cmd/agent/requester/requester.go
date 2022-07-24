@@ -13,7 +13,7 @@ func (*requester) Send(a string) error {
 	if err != nil {
 		return err
 	}
-	request.Header.Add("Content-Type", "text/plain")
+	request.Header.Add("Content-Type", "application/json")
 	response, err := client.Do(request)
 	fmt.Println(request.URL)
 	if err != nil {

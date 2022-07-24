@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -23,6 +24,7 @@ func New(service Service) *api {
 }
 
 func (a *api) updateMetricsHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("updateMetricsHandler")
 	w.Header().Set("content-type", "application/json")
 	s := r.URL.Path
 	s = strings.Trim(s, "/update")
@@ -34,10 +36,12 @@ func (a *api) updateMetricsHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
+		fmt.Println(err.Error())
 	}
 }
 
 func (a *api) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("getMetricsHandler")
 	w.Header().Set("content-type", "application/json")
 	s := r.URL.Path
 	s = strings.Trim(s, "/value")
@@ -68,9 +72,9 @@ func (a *api) Run() error {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	r.Post("/update/{type}/{metric}/{val}", a.updateMetricsHandler)
+	r.Post("/update/{body}", a.updateMetricsHandler)
 	r.Get("/", a.rootHandler)
-	r.Get("/value/{type}/{metric}", a.getMetricsHandler)
+	r.Post("/value/{body}", a.getMetricsHandler)
 	return http.ListenAndServe(":8080", r)
 }
 

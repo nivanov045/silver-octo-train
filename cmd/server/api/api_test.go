@@ -1,22 +1,27 @@
 package api
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"github.com/nivanov045/silver-octo-train/cmd/server/service"
-	"github.com/nivanov045/silver-octo-train/cmd/server/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/nivanov045/silver-octo-train/cmd/server/service"
+	"github.com/nivanov045/silver-octo-train/cmd/server/storage"
+	"github.com/nivanov045/silver-octo-train/internal/metrics"
 )
 
 func Test_api_updateMetricsHandler(t *testing.T) {
 	type args struct {
-		r string
-		m string
+		name       string
+		valueInt   int64
+		valueFloat float64
+		mType      string
 	}
 	type want struct {
 		statusCode int
@@ -29,8 +34,10 @@ func Test_api_updateMetricsHandler(t *testing.T) {
 		{
 			name: "correct counter request",
 			args: args{
-				r: "/update/counter/testCounter/100",
-				m: http.MethodPost,
+				name:       "testCounter",
+				valueInt:   100,
+				valueFloat: 0,
+				mType:      "counter",
 			},
 			want: want{
 				statusCode: http.StatusOK,
@@ -39,51 +46,25 @@ func Test_api_updateMetricsHandler(t *testing.T) {
 		{
 			name: "correct gauge request",
 			args: args{
-				r: "/update/gauge/testGauge/100",
-				m: http.MethodPost,
+				name:       "testGauge",
+				valueInt:   100.0,
+				valueFloat: 0,
+				mType:      "gauge",
 			},
 			want: want{
 				statusCode: http.StatusOK,
 			},
 		},
 		{
-			name: "1-part request",
+			name: "unknown metrics type",
 			args: args{
-				r: "/update/counter/",
-				m: http.MethodPost,
-			},
-			want: want{
-				statusCode: http.StatusNotFound,
-			},
-		},
-		{
-			name: "request invalid type",
-			args: args{
-				r: "/update/unknown/testCounter/100",
-				m: http.MethodPost,
+				name:       "testCounter",
+				valueInt:   100,
+				valueFloat: 0,
+				mType:      "unknown",
 			},
 			want: want{
 				statusCode: http.StatusNotImplemented,
-			},
-		},
-		{
-			name: "request invalid value",
-			args: args{
-				r: "/update/counter/testCounter/none",
-				m: http.MethodPost,
-			},
-			want: want{
-				statusCode: http.StatusBadRequest,
-			},
-		},
-		{
-			name: "request invalid value",
-			args: args{
-				r: "/update/gauge/testGauge/none",
-				m: http.MethodPost,
-			},
-			want: want{
-				statusCode: http.StatusBadRequest,
 			},
 		},
 	}
@@ -92,7 +73,14 @@ func Test_api_updateMetricsHandler(t *testing.T) {
 	a := api{serv}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			request := httptest.NewRequest(tt.args.m, tt.args.r, nil)
+			marshal, err := json.Marshal(metrics.MetricsInterface{
+				ID:    tt.args.name,
+				MType: tt.args.mType,
+				Delta: &tt.args.valueInt,
+				Value: &tt.args.valueFloat,
+			})
+			assert.NoError(t, err)
+			request := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/update/"+string(marshal), nil)
 			w := httptest.NewRecorder()
 			h := http.HandlerFunc(a.updateMetricsHandler)
 			h.ServeHTTP(w, request)
@@ -116,11 +104,19 @@ func Test_api_getMetricsHandler(t *testing.T) {
 	a := api{serv}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			requestSend := httptest.NewRequest(http.MethodPost, "/update/counter/TestMetrics/100", nil)
+			value := int64(100)
+			marshal, err := json.Marshal(metrics.MetricsInterface{
+				ID:    "TestMetrics",
+				MType: "counter",
+				Delta: &value,
+				Value: nil,
+			})
+			assert.NoError(t, err)
+			requestSend := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/update/"+string(marshal), nil)
 			wSend := httptest.NewRecorder()
 			hSend := http.HandlerFunc(a.updateMetricsHandler)
 			hSend.ServeHTTP(wSend, requestSend)
-			request := httptest.NewRequest(http.MethodGet, "/value/counter/TestMetrics/", nil)
+			request := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/value/"+string(marshal), nil)
 			w := httptest.NewRecorder()
 			h := http.HandlerFunc(a.getMetricsHandler)
 			h.ServeHTTP(w, request)
@@ -129,9 +125,13 @@ func Test_api_getMetricsHandler(t *testing.T) {
 			respBody, err := ioutil.ReadAll(result.Body)
 			require.NoError(t, err)
 			defer result.Body.Close()
-
 			assert.Equal(t, http.StatusOK, result.StatusCode)
-			assert.Equal(t, "100", strings.Trim(string(respBody), "\n"))
+			var mi metrics.MetricsInterface
+			err = json.Unmarshal(respBody, &mi)
+			require.NoError(t, err)
+			assert.Equal(t, int64(100), *mi.Delta)
+			assert.Equal(t, "counter", mi.MType)
+			assert.Equal(t, "TestMetrics", mi.ID)
 		})
 	}
 }
@@ -149,7 +149,15 @@ func Test_api_rootHandler(t *testing.T) {
 	a := api{serv}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			requestSend := httptest.NewRequest(http.MethodPost, "/update/counter/TestMetrics/100", nil)
+			value := int64(100)
+			marshal, err := json.Marshal(metrics.MetricsInterface{
+				ID:    "TestMetrics",
+				MType: "counter",
+				Delta: &value,
+				Value: nil,
+			})
+			assert.NoError(t, err)
+			requestSend := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/update/"+string(marshal), nil)
 			wSend := httptest.NewRecorder()
 			hSend := http.HandlerFunc(a.updateMetricsHandler)
 			hSend.ServeHTTP(wSend, requestSend)
