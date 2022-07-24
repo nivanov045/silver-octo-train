@@ -46,6 +46,8 @@ func (*metricsPerformer) UpdateMetrics(m metrics.Metrics) {
 			m.GaugeMetrics["Lookups"] = metrics.Gauge(memStat.Lookups)
 		case "MCacheInuse":
 			m.GaugeMetrics["MCacheInuse"] = metrics.Gauge(memStat.MCacheInuse)
+		case "MCacheSys":
+			m.GaugeMetrics["MCacheSys"] = metrics.Gauge(memStat.MCacheSys)
 		case "MSpanInuse":
 			m.GaugeMetrics["MSpanInuse"] = metrics.Gauge(memStat.MSpanInuse)
 		case "MSpanSys":
