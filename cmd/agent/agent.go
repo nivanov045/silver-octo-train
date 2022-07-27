@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -16,7 +16,7 @@ const (
 )
 
 func main() {
-	fmt.Println("agent.go::19")
+	log.Println("agent::main: started")
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc,
 		syscall.SIGTERM,

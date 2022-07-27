@@ -3,7 +3,8 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+	"log"
+
 	"github.com/nivanov045/silver-octo-train/internal/metrics"
 )
 
@@ -25,88 +26,85 @@ const (
 )
 
 func (ser *service) ParseAndSave(s []byte) error {
-	fmt.Println("ParseAndSave")
+	log.Println("service::ParseAndSave: started")
 	var m metrics.MetricsInterface
 	err := json.Unmarshal(s, &m)
 	if err != nil {
-		fmt.Println("wrong query: ", string(s))
+		log.Println("service::ParseAndSave: can't unmarshal", string(s), "with error", err)
 		return errors.New("wrong query")
 	}
 	metricType := m.MType
 	metricName := m.ID
-	fmt.Println("ParseAndSave: ", metricName)
+	log.Println("service::ParseAndSave: type:", metricType, "; name:", metricName)
 	if metricType == gauge {
-		fmt.Println("gauge")
 		value := m.Value
 		if value == nil {
-			fmt.Println("wrong query")
+			log.Println("service::ParseAndSave: gauge value is empty")
 			return errors.New("wrong query")
 		}
 		ser.storage.SetGaugeMetrics(metricName, metrics.Gauge(*value))
 	} else if metricType == counter {
-		fmt.Println("counter")
-		exVal, ok := ser.storage.GetCounterMetrics(metricName)
 		if m.Delta == nil {
-			fmt.Println("wrong query")
+			log.Println("service::ParseAndSave: counter delta is empty")
 			return errors.New("wrong query")
 		}
 		value := *m.Delta
+		exVal, ok := ser.storage.GetCounterMetrics(metricName)
 		if !ok {
-			fmt.Println("!ok")
+			log.Println("service::ParseAndSave: new counter metric")
 			ser.storage.SetCounterMetrics(metricName, metrics.Counter(value))
 		} else {
-			fmt.Println("else")
+			log.Println("service::ParseAndSave: update counter metric")
 			ser.storage.SetCounterMetrics(metricName, metrics.Counter(int64(exVal)+value))
 		}
 	} else {
-		fmt.Println("wrong metrics type")
+		log.Println("service::ParseAndSave: unknown metrics type")
 		return errors.New("wrong metrics type")
 	}
 	return nil
 }
 
 func (ser *service) ParseAndGet(s []byte) ([]byte, error) {
-	fmt.Println("ParseAndGet")
+	log.Println("service::ParseAndGet: started")
 	var m metrics.MetricsInterface
 	err := json.Unmarshal(s, &m)
 	if err != nil {
-		fmt.Println("wrong query: ", string(s))
+		log.Println("service::ParseAndGet: can't unmarshal", string(s), "with error", err)
 		return nil, errors.New("wrong query")
 	}
 	metricType := m.MType
 	metricName := m.ID
-	fmt.Println("ParseAndGet: ", metricName)
+	log.Println("service::ParseAndGet: type:", metricType, "; name:", metricName)
 	if metricType == gauge {
-		fmt.Println("gauge")
 		val, ok := ser.storage.GetGaugeMetrics(metricName)
 		if !ok {
-			fmt.Println("no such metric")
+			log.Println("service::ParseAndGet: no such gauge metrics")
 			return nil, errors.New("no such metric")
 		}
 		asFloat := float64(val)
 		m.Value = &asFloat
 		marshal, err := json.Marshal(m)
 		if err != nil {
-			fmt.Println("err != nil")
+			log.Panic("service::ParseAndGet: can't marshal gauge metric with", err)
 			return nil, err
 		}
 		return marshal, nil
 	} else if metricType == counter {
-		fmt.Println("counter")
 		val, ok := ser.storage.GetCounterMetrics(metricName)
 		if !ok {
-			fmt.Println("no such metric")
+			log.Println("service::ParseAndGet: no such counter metrics")
 			return nil, errors.New("no such metric")
 		}
 		asint := int64(val)
 		m.Delta = &asint
 		marshal, err := json.Marshal(m)
 		if err != nil {
-			fmt.Println("err != nil")
+			log.Panic("service::ParseAndGet: can't marshal caunter metric with", err)
 			return nil, err
 		}
 		return marshal, nil
 	}
+	log.Println("service::ParseAndGet: unknown metrics type")
 	return nil, errors.New("wrong metrics type")
 }
 

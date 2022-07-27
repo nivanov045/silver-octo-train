@@ -2,7 +2,6 @@ package metricsagent
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 
@@ -22,6 +21,7 @@ func (a *metricsagent) updateMetrics() {
 	for {
 		<-ticker.C
 		metricsperformer.New().UpdateMetrics(a.Metrics)
+		log.Println("metricsagent::updateMetrics: metrics were updated")
 	}
 }
 
@@ -30,22 +30,20 @@ func (a *metricsagent) sendMetrics() {
 	for {
 		<-ticker.C
 		for key, val := range a.Metrics.GaugeMetrics {
-			asfloat := float64(val)
+			asFloat := float64(val)
 			metricForSend := metrics.MetricsInterface{
 				ID:    key,
 				MType: "gauge",
 				Delta: nil,
-				Value: &asfloat,
+				Value: &asFloat,
 			}
 			marshalled, err := json.Marshal(metricForSend)
 			if err != nil {
-				fmt.Println("Fatal 1")
-				log.Fatal(err)
+				log.Panicln("metricsagent::sendMetrics: can't marshal gauge metric for sand with", err)
 			}
 			err = requester.New().Send(marshalled)
 			if err != nil {
-				fmt.Println("sendMetrics::46")
-				log.Fatal(err)
+				log.Println("metricsagent::sendMetrics: can't send gauge with", err)
 			}
 		}
 		pc := a.Metrics.CounterMetrics["PollCount"]
@@ -58,19 +56,18 @@ func (a *metricsagent) sendMetrics() {
 		}
 		marshalled, err := json.Marshal(metricForSend)
 		if err != nil {
-			fmt.Println("sendMetrics::59")
-			log.Fatal(err)
+			log.Panicln("metricsagent::sendMetrics: can't marshal PollCount metric for sand with", err)
 		}
 		err = requester.New().Send(marshalled)
 		if err != nil {
-			fmt.Println("sendMetrics::64")
-			log.Fatal(err)
+			log.Println("metricsagent::sendMetrics: can't send PollCount with", err)
 		}
-		//fmt.Println("Reported ", a.Metrics.CounterMetrics["PollCount"])
+		log.Println("metricsagent::sendMetrics: metrics were sent")
 	}
 }
 
 func (a *metricsagent) Start() {
+	log.Println("metricsagent::Start: metricsagent started")
 	go a.updateMetrics()
 	go a.sendMetrics()
 }

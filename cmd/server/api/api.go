@@ -1,10 +1,10 @@
 package api
 
 import (
-	"fmt"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -23,56 +23,58 @@ func New(service Service) *api {
 }
 
 func (a *api) updateMetricsHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("updateMetricsHandler")
+	log.Println("api::updateMetricsHandler: started")
 	w.Header().Set("content-type", "application/json")
-	respBody, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
+	respBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		fmt.Println("StatusNotFound")
+		log.Println("api::updateMetricsHandler: can't read response body with", err)
 		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 	if err := a.service.ParseAndSave(respBody); err == nil {
-		fmt.Println("StatusOK")
+		log.Println("api::updateMetricsHandler: parsed and saved")
 		w.WriteHeader(http.StatusOK)
-	} else if err.Error() == "wrong metrics type" {
-		fmt.Println("StatusNotImplemented")
-		w.WriteHeader(http.StatusNotImplemented)
-	} else if err.Error() == "can't parse value" {
-		fmt.Println("StatusBadRequest")
-		w.WriteHeader(http.StatusBadRequest)
 	} else {
-		fmt.Println("StatusNotFound")
-		w.WriteHeader(http.StatusNotFound)
+		log.Println("api::updateMetricsHandler: error in parsing:", err)
+		if err.Error() == "wrong metrics type" {
+			w.WriteHeader(http.StatusNotImplemented)
+		} else if err.Error() == "can't parse value" {
+			w.WriteHeader(http.StatusBadRequest)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
 	}
 }
 
 func (a *api) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
-	//fmt.Println("getMetricsHandler")
+	log.Println("api::getMetricsHandler: started")
 	w.Header().Set("content-type", "application/json")
-	respBody, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
+	respBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		fmt.Println("StatusNotFound")
+		log.Println("api::getMetricsHandler: can't read response body with", err)
 		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 	if val, err := a.service.ParseAndGet(respBody); err == nil {
-		fmt.Println("StatusOK")
+		log.Println("api::getMetricsHandler: parsed and get")
 		w.WriteHeader(http.StatusOK)
-		w.Header().Set("Content-Type", "application/json")
 		w.Write(val)
-	} else if err.Error() == "wrong metrics type" {
-		fmt.Println("StatusNotImplemented")
-		w.WriteHeader(http.StatusNotImplemented)
-	} else if err.Error() == "no such metric" {
-		fmt.Println("StatusNotFound")
-		w.WriteHeader(http.StatusNotFound)
 	} else {
-		fmt.Println("StatusBadRequest")
-		w.WriteHeader(http.StatusBadRequest)
+		log.Println("api::getMetricsHandler: error in parsing:", err)
+		if err.Error() == "wrong metrics type" {
+			w.WriteHeader(http.StatusNotImplemented)
+		} else if err.Error() == "no such metric" {
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+			w.WriteHeader(http.StatusBadRequest)
+		}
 	}
 }
 
 func (a *api) rootHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("api::rootHandler: started")
 	w.Header().Set("content-type", "text/html")
 	for _, val := range a.service.GetKnownMetrics() {
 		w.Write([]byte(val + "\n"))

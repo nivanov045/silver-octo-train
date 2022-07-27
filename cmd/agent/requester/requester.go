@@ -2,27 +2,23 @@ package requester
 
 import (
 	"bytes"
-	"fmt"
+	"log"
 	"net/http"
 )
 
 type requester struct{}
 
 func (*requester) Send(a []byte) error {
-	fmt.Println("Snd")
+	log.Println("requester::Send: started")
 	client := &http.Client{}
 	request, err := http.NewRequest(http.MethodPost, "http://localhost:8080/update/", bytes.NewBuffer(a))
 	if err != nil {
-		fmt.Println("err != nil")
-		return err
+		log.Panicln("requester::Send: can't create request with", err)
 	}
 	request.Header.Set("Content-Type", "application/json")
-	//request.Close = true
-	fmt.Println(request.URL)
-	fmt.Println(string(a))
 	response, err := client.Do(request)
 	if err != nil {
-		fmt.Println("err != nil 2 with ", err)
+		log.Println("requester::Send: error in request execution:", err)
 		return nil
 	}
 	defer response.Body.Close()
