@@ -9,7 +9,7 @@ import (
 type requester struct{}
 
 func (*requester) Send(a []byte) error {
-	log.Println("requester::Send: started")
+	log.Println("requester::Send: started", string(a))
 	client := &http.Client{}
 	request, err := http.NewRequest(http.MethodPost, "http://localhost:8080/update/", bytes.NewBuffer(a))
 	request.Close = true

@@ -23,7 +23,7 @@ func New(service Service) *api {
 }
 
 func (a *api) updateMetricsHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("api::updateMetricsHandler: started")
+	log.Println("api::updateMetricsHandler: started ", r)
 	w.Header().Set("content-type", "application/json")
 	defer r.Body.Close()
 	respBody, err := ioutil.ReadAll(r.Body)
@@ -48,7 +48,7 @@ func (a *api) updateMetricsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *api) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("api::getMetricsHandler: started")
+	log.Println("api::getMetricsHandler: started", r)
 	w.Header().Set("content-type", "application/json")
 	defer r.Body.Close()
 	respBody, err := ioutil.ReadAll(r.Body)

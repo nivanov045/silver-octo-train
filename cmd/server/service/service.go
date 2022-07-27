@@ -26,11 +26,11 @@ const (
 )
 
 func (ser *service) ParseAndSave(s []byte) error {
-	log.Println("service::ParseAndSave: started")
+	log.Println("service::ParseAndSave: started", string(s))
 	var m metrics.MetricsInterface
 	err := json.Unmarshal(s, &m)
 	if err != nil {
-		log.Println("service::ParseAndSave: can't unmarshal", string(s), "with error", err)
+		log.Println("service::ParseAndSave: can't unmarshal with error", err)
 		return errors.New("wrong query")
 	}
 	metricType := m.MType
@@ -65,11 +65,11 @@ func (ser *service) ParseAndSave(s []byte) error {
 }
 
 func (ser *service) ParseAndGet(s []byte) ([]byte, error) {
-	log.Println("service::ParseAndGet: started")
+	log.Println("service::ParseAndGet: started", string(s))
 	var m metrics.MetricsInterface
 	err := json.Unmarshal(s, &m)
 	if err != nil {
-		log.Println("service::ParseAndGet: can't unmarshal", string(s), "with error", err)
+		log.Println("service::ParseAndGet: can't unmarshal with error", err)
 		return nil, errors.New("wrong query")
 	}
 	metricType := m.MType
