@@ -12,6 +12,7 @@ func (*requester) Send(a []byte) error {
 	log.Println("requester::Send: started")
 	client := &http.Client{}
 	request, err := http.NewRequest(http.MethodPost, "http://localhost:8080/update/", bytes.NewBuffer(a))
+	request.Close = true
 	if err != nil {
 		log.Panicln("requester::Send: can't create request with", err)
 	}
