@@ -25,6 +25,7 @@ func New(service Service) *api {
 func (a *api) updateMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("api::updateMetricsHandler: started ", r)
 	w.Header().Set("content-type", "application/json")
+	w.Write([]byte("{}"))
 	defer r.Body.Close()
 	respBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -45,6 +46,7 @@ func (a *api) updateMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
 		}
 	}
+	log.Println("api::updateMetricsHandler: response:", w)
 }
 
 func (a *api) getMetricsHandler(w http.ResponseWriter, r *http.Request) {
