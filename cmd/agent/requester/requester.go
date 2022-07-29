@@ -6,12 +6,14 @@ import (
 	"net/http"
 )
 
-type requester struct{}
+type Requester struct {
+	address string
+}
 
-func (*requester) Send(a []byte) error {
+func (r *Requester) Send(a []byte) error {
 	log.Println("requester::Send: started", string(a))
 	client := &http.Client{}
-	request, err := http.NewRequest(http.MethodPost, "http://localhost:8080/update/", bytes.NewBuffer(a))
+	request, err := http.NewRequest(http.MethodPost, "http://"+r.address+"/update/", bytes.NewBuffer(a))
 	request.Close = true
 	if err != nil {
 		log.Panicln("requester::Send: can't create request with", err)
@@ -26,6 +28,6 @@ func (*requester) Send(a []byte) error {
 	return nil
 }
 
-func New() *requester {
-	return &requester{}
+func New(address string) *Requester {
+	return &Requester{address: address}
 }
