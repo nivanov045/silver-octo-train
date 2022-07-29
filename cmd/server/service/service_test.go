@@ -57,7 +57,7 @@ func Test_service_ParseAndSave(t *testing.T) {
 			}
 			marshal, err := json.Marshal(v)
 			assert.NoError(t, err)
-			err = ser.ParseAndSave(string(marshal))
+			err = ser.ParseAndSave(marshal)
 			assert.NoError(t, err)
 		})
 	}
@@ -109,7 +109,7 @@ func Test_service_ParseAndGet(t *testing.T) {
 			}
 			marshal, err := json.Marshal(v)
 			assert.NoError(t, err)
-			err = ser.ParseAndSave(string(marshal))
+			err = ser.ParseAndSave(marshal)
 			assert.NoError(t, err)
 			marshalGet, err := json.Marshal(metrics.MetricsInterface{
 				ID:    tt.data.name,
@@ -118,9 +118,9 @@ func Test_service_ParseAndGet(t *testing.T) {
 				Value: nil,
 			})
 			assert.NoError(t, err)
-			got, err := ser.ParseAndGet(string(marshalGet))
+			got, err := ser.ParseAndGet(marshalGet)
 			assert.NoError(t, err)
-			assert.Equal(t, got, string(marshal))
+			assert.Equal(t, got, marshal)
 		})
 	}
 }
@@ -169,7 +169,7 @@ func Test_service_GetKnownMetrics(t *testing.T) {
 					Value: &val.valueFloat,
 				})
 				assert.NoError(t, err)
-				tt.ser.ParseAndSave(string(marshal))
+				tt.ser.ParseAndSave(marshal)
 			}
 			if got := tt.ser.GetKnownMetrics(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("service.GetKnownMetrics() = %v, want %v", got, tt.want)

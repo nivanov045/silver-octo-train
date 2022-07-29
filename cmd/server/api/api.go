@@ -25,12 +25,12 @@ func New(service Service) *api {
 func (a *api) updateMetricsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("api::updateMetricsHandler: started ", r)
 	w.Header().Set("content-type", "application/json")
-	w.Write([]byte("{}"))
 	defer r.Body.Close()
 	respBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println("api::updateMetricsHandler: can't read response body with", err)
 		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("{}"))
 		return
 	}
 	if err := a.service.ParseAndSave(respBody); err == nil {
@@ -46,6 +46,7 @@ func (a *api) updateMetricsHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotFound)
 		}
 	}
+	w.Write([]byte("{}"))
 	log.Println("api::updateMetricsHandler: response:", w)
 }
 
