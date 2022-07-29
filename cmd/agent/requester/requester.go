@@ -1,23 +1,26 @@
 package requester
 
 import (
-	"fmt"
+	"bytes"
+	"log"
 	"net/http"
 )
 
 type requester struct{}
 
-func (*requester) Send(a string) error {
+func (*requester) Send(a []byte) error {
+	log.Println("requester::Send: started", string(a))
 	client := &http.Client{}
-	request, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:8080/"+a, nil)
+	request, err := http.NewRequest(http.MethodPost, "http://localhost:8080/update/", bytes.NewBuffer(a))
+	request.Close = true
 	if err != nil {
-		return err
+		log.Panicln("requester::Send: can't create request with", err)
 	}
-	request.Header.Add("Content-Type", "text/plain")
+	request.Header.Set("Content-Type", "application/json")
 	response, err := client.Do(request)
-	fmt.Println(request.URL)
 	if err != nil {
-		return err
+		log.Println("requester::Send: error in request execution:", err)
+		return nil
 	}
 	defer response.Body.Close()
 	return nil
