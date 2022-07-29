@@ -10,14 +10,20 @@ import (
 	"github.com/nivanov045/silver-octo-train/internal/metrics"
 )
 
+type Config struct {
+	Address        string        `env:"ADDRESS" envDefault:"127.0.0.1:8080"`
+	ReportInterval time.Duration `env:"REPORT_INTERVAL" envDefault:"10s"`
+	PollInterval   time.Duration `env:"POLL_INTERVAL" envDefault:"2s"`
+}
+
 type metricsagent struct {
-	Metrics        metrics.Metrics
-	pollInterval   time.Duration
-	reportInterval time.Duration
+	Metrics   metrics.Metrics
+	config    Config
+	requester requester.Requester
 }
 
 func (a *metricsagent) updateMetrics() {
-	ticker := time.NewTicker(a.pollInterval)
+	ticker := time.NewTicker(a.config.PollInterval)
 	for {
 		<-ticker.C
 		metricsperformer.New().UpdateMetrics(a.Metrics)
@@ -26,7 +32,7 @@ func (a *metricsagent) updateMetrics() {
 }
 
 func (a *metricsagent) sendMetrics() {
-	ticker := time.NewTicker(a.reportInterval)
+	ticker := time.NewTicker(a.config.ReportInterval)
 	for {
 		<-ticker.C
 		for key, val := range a.Metrics.GaugeMetrics {
@@ -41,7 +47,7 @@ func (a *metricsagent) sendMetrics() {
 			if err != nil {
 				log.Panicln("metricsagent::sendMetrics: can't marshal gauge metric for sand with", err)
 			}
-			err = requester.New().Send(marshalled)
+			err = a.requester.Send(marshalled)
 			if err != nil {
 				log.Println("metricsagent::sendMetrics: can't send gauge with", err)
 			}
@@ -58,7 +64,7 @@ func (a *metricsagent) sendMetrics() {
 		if err != nil {
 			log.Panicln("metricsagent::sendMetrics: can't marshal PollCount metric for sand with", err)
 		}
-		err = requester.New().Send(marshalled)
+		err = a.requester.Send(marshalled)
 		if err != nil {
 			log.Println("metricsagent::sendMetrics: can't send PollCount with", err)
 		}
@@ -72,13 +78,13 @@ func (a *metricsagent) Start() {
 	go a.sendMetrics()
 }
 
-func New(pollInterval time.Duration, reportInterval time.Duration) *metricsagent {
+func New(c Config) *metricsagent {
 	return &metricsagent{
 		Metrics: metrics.Metrics{
 			GaugeMetrics:   map[string]metrics.Gauge{},
 			CounterMetrics: map[string]metrics.Counter{},
 		},
-		pollInterval:   pollInterval,
-		reportInterval: reportInterval,
+		config:    c,
+		requester: *requester.New(c.Address),
 	}
 }

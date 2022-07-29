@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/caarlos0/env/v6"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"io/ioutil"
@@ -84,6 +85,10 @@ func (a *api) rootHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type Config struct {
+	Address string `env:"ADDRESS" envDefault:"127.0.0.1:8080"`
+}
+
 func (a *api) Run() error {
 	r := chi.NewRouter()
 
@@ -95,7 +100,15 @@ func (a *api) Run() error {
 	r.Post("/update/", a.updateMetricsHandler)
 	r.Get("/", a.rootHandler)
 	r.Post("/value/", a.getMetricsHandler)
-	return http.ListenAndServe(":8080", r)
+
+	var cfg Config
+	err := env.Parse(&cfg)
+	if err != nil {
+		log.Fatalln("api::Run: error in env parsing:", err)
+	}
+	log.Println("agent::main: cfg:", cfg)
+
+	return http.ListenAndServe(cfg.Address, r)
 }
 
 type API interface {
