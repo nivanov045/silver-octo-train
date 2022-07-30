@@ -29,7 +29,7 @@ func main() {
 	flag.DurationVar(&cfg.StoreInterval, "i", cfg.StoreInterval, "store interval")
 	flag.BoolVar(&cfg.Restore, "r", cfg.Restore, "restore")
 	flag.StringVar(&cfg.StoreFile, "f", cfg.StoreFile, "store file")
-
+	flag.Parse()
 	log.Println("server::main: cfg:", cfg)
 
 	storage := storage.New(cfg.StoreInterval, cfg.StoreFile, cfg.Restore)
