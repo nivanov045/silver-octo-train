@@ -15,11 +15,16 @@ type storage struct {
 	storeFile     string
 	restore       bool
 	hasUpdates    bool
+	sincSave      bool
 }
 
 func (s *storage) SetCounterMetrics(name string, val metrics.Counter) {
 	s.Metrics.CounterMetrics[name] = val
-	s.hasUpdates = true
+	if s.sincSave {
+		s.saveToFile()
+	} else {
+		s.hasUpdates = true
+	}
 }
 
 func (s *storage) GetCounterMetrics(name string) (metrics.Counter, bool) {
@@ -31,7 +36,11 @@ func (s *storage) GetCounterMetrics(name string) (metrics.Counter, bool) {
 
 func (s *storage) SetGaugeMetrics(name string, val metrics.Gauge) {
 	s.Metrics.GaugeMetrics[name] = val
-	s.hasUpdates = true
+	if s.sincSave {
+		s.saveToFile()
+	} else {
+		s.hasUpdates = true
+	}
 }
 
 func (s *storage) GetGaugeMetrics(name string) (metrics.Gauge, bool) {
@@ -70,7 +79,7 @@ func (s *storage) restoreFromFile() error {
 
 func (s *storage) saveToFile() error {
 	log.Println("storage::saveToFile: started")
-	if !s.hasUpdates {
+	if !s.sincSave && !s.hasUpdates {
 		log.Println("storage::saveToFile: nothing to update")
 		return nil
 	}
@@ -120,6 +129,7 @@ func New(storeInterval time.Duration, storeFile string, restore bool) *storage {
 		storeFile:     storeFile,
 		restore:       restore,
 		hasUpdates:    false,
+		sincSave:      false,
 	}
 	if restore {
 		err := res.restoreFromFile()
@@ -128,6 +138,10 @@ func New(storeInterval time.Duration, storeFile string, restore bool) *storage {
 		}
 	}
 	runtime.SetFinalizer(res, StorageFinalizer)
-	go res.saveByTimer()
+	if res.storeInterval > 0*time.Second {
+		go res.saveByTimer()
+	} else {
+		res.sincSave = true
+	}
 	return res
 }
