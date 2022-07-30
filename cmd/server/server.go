@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/caarlos0/env/v6"
 	"log"
 	"time"
@@ -11,14 +12,21 @@ import (
 )
 
 type config struct {
-	Address       string        `env:"ADDRESS" envDefault:"127.0.0.1:8080"`
-	StoreInterval time.Duration `env:"STORE_INTERVAL" envDefault:"0s"`
-	StoreFile     string        `env:"STORE_FILE" envDefault:"/tmp/devops-metrics-db.json"`
-	Restore       bool          `env:"RESTORE" envDefault:"true"`
+	Address       string        `env:"ADDRESS"`
+	StoreInterval time.Duration `env:"STORE_INTERVAL"`
+	StoreFile     string        `env:"STORE_FILE"`
+	Restore       bool          `env:"RESTORE"`
 }
 
 func main() {
 	var cfg config
+
+	flag.StringVar(&cfg.Address, "a", "127.0.0.1:8080", "address")
+	flag.DurationVar(&cfg.StoreInterval, "i", 300*time.Second, "store interval")
+	flag.BoolVar(&cfg.Restore, "r", true, "restore")
+	flag.StringVar(&cfg.StoreFile, "f", "/tmp/devops-metrics-db.json", "store file")
+	flag.Parse()
+
 	err := env.Parse(&cfg)
 	if err != nil {
 		log.Fatalln("server::main: error in env parsing:", err)
