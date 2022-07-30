@@ -92,6 +92,7 @@ func (a *api) Run(address string) error {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.Compress(5, "application/json"))
 
 	r.Post("/update/", a.updateMetricsHandler)
 	r.Get("/", a.rootHandler)
