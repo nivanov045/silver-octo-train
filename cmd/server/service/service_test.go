@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -41,7 +42,7 @@ func Test_service_ParseAndSave(t *testing.T) {
 			},
 		},
 	}
-	ser := service{storage.New()}
+	ser := service{storage.New(0*time.Second, "/tmp/devops-metrics-db.json", false)}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			v := metrics.MetricsInterface{
@@ -93,7 +94,7 @@ func Test_service_ParseAndGet(t *testing.T) {
 			},
 		},
 	}
-	ser := service{storage.New()}
+	ser := service{storage.New(0*time.Second, "/tmp/devops-metrics-db.json", false)}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			v := metrics.MetricsInterface{
@@ -141,7 +142,7 @@ func Test_service_GetKnownMetrics(t *testing.T) {
 		{
 			name: "correct",
 			ser: &service{
-				storage: storage.New(),
+				storage: storage.New(0*time.Second, "/tmp/devops-metrics-db.json", false),
 			},
 			want: []string{"TestMetricC", "TestMetricG"},
 			set: []args{

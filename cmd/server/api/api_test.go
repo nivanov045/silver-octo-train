@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -68,7 +69,7 @@ func Test_api_updateMetricsHandler(t *testing.T) {
 			},
 		},
 	}
-	storage := storage.New()
+	storage := storage.New(0*time.Second, "/tmp/devops-metrics-db.json", false)
 	serv := service.New(storage)
 	a := api{serv}
 	for _, tt := range tests {
@@ -99,7 +100,7 @@ func Test_api_getMetricsHandler(t *testing.T) {
 			name: "correct",
 		},
 	}
-	storage := storage.New()
+	storage := storage.New(0*time.Second, "/tmp/devops-metrics-db.json", false)
 	serv := service.New(storage)
 	a := api{serv}
 	for _, tt := range tests {
@@ -144,7 +145,7 @@ func Test_api_rootHandler(t *testing.T) {
 			name: "correct",
 		},
 	}
-	storage := storage.New()
+	storage := storage.New(0*time.Second, "/tmp/devops-metrics-db.json", false)
 	serv := service.New(storage)
 	a := api{serv}
 	for _, tt := range tests {

@@ -1,7 +1,6 @@
 package api
 
 import (
-	"github.com/caarlos0/env/v6"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"io/ioutil"
@@ -85,11 +84,8 @@ func (a *api) rootHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type Config struct {
-	Address string `env:"ADDRESS" envDefault:"127.0.0.1:8080"`
-}
-
-func (a *api) Run() error {
+func (a *api) Run(address string) error {
+	log.Println("api::Run: started with addr", address)
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -101,18 +97,11 @@ func (a *api) Run() error {
 	r.Get("/", a.rootHandler)
 	r.Post("/value/", a.getMetricsHandler)
 
-	var cfg Config
-	err := env.Parse(&cfg)
-	if err != nil {
-		log.Fatalln("api::Run: error in env parsing:", err)
-	}
-	log.Println("agent::main: cfg:", cfg)
-
-	return http.ListenAndServe(cfg.Address, r)
+	return http.ListenAndServe(address, r)
 }
 
 type API interface {
-	Run() error
+	Run(string2 string) error
 }
 
 var _ API = &api{}
