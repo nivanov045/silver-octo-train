@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/caarlos0/env/v6"
 	"log"
 	"time"
@@ -23,6 +24,12 @@ func main() {
 	if err != nil {
 		log.Fatalln("server::main: error in env parsing:", err)
 	}
+
+	flag.StringVar(&cfg.Address, "a", cfg.Address, "address")
+	flag.DurationVar(&cfg.StoreInterval, "i", cfg.StoreInterval, "store interval")
+	flag.BoolVar(&cfg.Restore, "r", cfg.Restore, "restore")
+	flag.StringVar(&cfg.StoreFile, "f", cfg.StoreFile, "store file")
+
 	log.Println("server::main: cfg:", cfg)
 
 	storage := storage.New(cfg.StoreInterval, cfg.StoreFile, cfg.Restore)

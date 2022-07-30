@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/caarlos0/env/v6"
 	"log"
 	"os"
@@ -18,6 +19,13 @@ func main() {
 	if err != nil {
 		log.Fatalln("agent::main: error in env parsing:", err)
 	}
+
+	flag.StringVar(&cfg.Address, "a", cfg.Address, "address")
+	log.Println(cfg.Address)
+	flag.DurationVar(&cfg.PollInterval, "p", cfg.PollInterval, "poll interval")
+	flag.DurationVar(&cfg.ReportInterval, "r", cfg.ReportInterval, "report interval")
+	flag.Parse()
+
 	log.Println("agent::main: cfg:", cfg)
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc,
