@@ -2,11 +2,12 @@ package storage
 
 import (
 	"encoding/json"
-	"github.com/nivanov045/silver-octo-train/internal/metrics"
 	"log"
 	"os"
 	"runtime"
 	"time"
+
+	"github.com/nivanov045/silver-octo-train/internal/metrics"
 )
 
 type storage struct {

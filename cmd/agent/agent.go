@@ -2,12 +2,13 @@ package main
 
 import (
 	"flag"
-	"github.com/caarlos0/env/v6"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/caarlos0/env/v6"
 
 	"github.com/nivanov045/silver-octo-train/cmd/agent/metricsagent"
 )

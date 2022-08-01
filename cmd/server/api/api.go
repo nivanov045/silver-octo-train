@@ -1,11 +1,12 @@
 package api
 
 import (
-	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/chi/v5"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5"
 )
 
 type Service interface {
