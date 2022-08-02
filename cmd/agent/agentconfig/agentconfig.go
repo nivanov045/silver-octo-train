@@ -22,14 +22,13 @@ func BuildConfig() (Config, error) {
 
 func (cfg *Config) buildFromFlags() {
 	flag.StringVar(&cfg.Address, "a", "127.0.0.1:8080", "address")
-	log.Println(cfg.Address)
 	flag.DurationVar(&cfg.PollInterval, "p", 5*time.Second, "poll interval")
 	flag.DurationVar(&cfg.ReportInterval, "r", 10*time.Second, "report interval")
 	flag.Parse()
 }
 
 func (cfg *Config) buildFromEnv() error {
-	err := env.Parse(&cfg)
+	err := env.Parse(cfg)
 	if err != nil {
 		log.Println("agentconfig::buildFromEnv: error in env parsing:", err)
 	}

@@ -30,7 +30,7 @@ func (cfg *Config) buildFromFlags() {
 }
 
 func (cfg *Config) buildFromEnv() error {
-	err := env.Parse(&cfg)
+	err := env.Parse(cfg)
 	if err != nil {
 		log.Println("serverconfig::buildFromEnv: error in env parsing:", err)
 	}
