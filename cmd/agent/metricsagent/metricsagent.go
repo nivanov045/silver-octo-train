@@ -2,6 +2,7 @@ package metricsagent
 
 import (
 	"encoding/json"
+	"github.com/nivanov045/silver-octo-train/cmd/agent/agentconfig"
 	"log"
 	"time"
 
@@ -10,15 +11,9 @@ import (
 	"github.com/nivanov045/silver-octo-train/internal/metrics"
 )
 
-type Config struct {
-	Address        string        `env:"ADDRESS"`
-	ReportInterval time.Duration `env:"REPORT_INTERVAL"`
-	PollInterval   time.Duration `env:"POLL_INTERVAL"`
-}
-
 type metricsagent struct {
 	Metrics   metrics.Metrics
-	config    Config
+	config    agentconfig.Config
 	requester requester.Requester
 }
 
@@ -78,7 +73,7 @@ func (a *metricsagent) Start() {
 	go a.sendMetrics()
 }
 
-func New(c Config) *metricsagent {
+func New(c agentconfig.Config) *metricsagent {
 	return &metricsagent{
 		Metrics: metrics.Metrics{
 			GaugeMetrics:   map[string]metrics.Gauge{},
