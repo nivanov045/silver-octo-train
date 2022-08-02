@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/nivanov045/silver-octo-train/internal/metrics"
@@ -16,13 +17,44 @@ type storage struct {
 	storeFile     string
 	restore       bool
 	hasUpdates    bool
-	sincSave      bool
+	syncSave      bool
+	mu            sync.Mutex
+}
+
+func New(storeInterval time.Duration, storeFile string, restore bool) *storage {
+	var res = &storage{
+		Metrics: metrics.Metrics{
+			GaugeMetrics:   map[string]metrics.Gauge{},
+			CounterMetrics: map[string]metrics.Counter{},
+		},
+		storeInterval: storeInterval,
+		storeFile:     storeFile,
+		restore:       restore,
+		hasUpdates:    false,
+		syncSave:      false,
+	}
+	if restore {
+		err := res.restoreFromFile()
+		if err != nil {
+			log.Println("storage::New: restore error:", err)
+		}
+	}
+	runtime.SetFinalizer(res, StorageFinalizer)
+	if res.storeInterval > 0*time.Second {
+		go res.saveByTimer()
+	} else {
+		res.syncSave = true
+	}
+	return res
 }
 
 func (s *storage) SetCounterMetrics(name string, val metrics.Counter) {
 	s.Metrics.CounterMetrics[name] = val
-	if s.sincSave {
-		s.saveToFile()
+	if s.syncSave {
+		err := s.saveToFile()
+		if err != nil {
+			log.Println("storage::SetCounterMetrics: can't save to file:", err)
+		}
 	} else {
 		s.hasUpdates = true
 	}
@@ -37,8 +69,11 @@ func (s *storage) GetCounterMetrics(name string) (metrics.Counter, bool) {
 
 func (s *storage) SetGaugeMetrics(name string, val metrics.Gauge) {
 	s.Metrics.GaugeMetrics[name] = val
-	if s.sincSave {
-		s.saveToFile()
+	if s.syncSave {
+		err := s.saveToFile()
+		if err != nil {
+			log.Println("storage::SetGaugeMetrics: can't save to file:", err)
+		}
 	} else {
 		s.hasUpdates = true
 	}
@@ -63,6 +98,8 @@ func (s *storage) GetKnownMetrics() []string {
 }
 
 func (s *storage) restoreFromFile() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	file, err := os.OpenFile(s.storeFile, os.O_RDONLY|os.O_CREATE, 0777)
 	if err != nil {
 		log.Println("storage::restoreFromFile: can't open file:", err)
@@ -79,8 +116,10 @@ func (s *storage) restoreFromFile() error {
 }
 
 func (s *storage) saveToFile() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	log.Println("storage::saveToFile: started")
-	if !s.sincSave && !s.hasUpdates {
+	if !s.syncSave && !s.hasUpdates {
 		log.Println("storage::saveToFile: nothing to update")
 		return nil
 	}
@@ -118,31 +157,4 @@ func (s *storage) saveByTimer() {
 			log.Println("storage::saveByTimer: can't make usual save to file:", err)
 		}
 	}
-}
-
-func New(storeInterval time.Duration, storeFile string, restore bool) *storage {
-	var res = &storage{
-		Metrics: metrics.Metrics{
-			GaugeMetrics:   map[string]metrics.Gauge{},
-			CounterMetrics: map[string]metrics.Counter{},
-		},
-		storeInterval: storeInterval,
-		storeFile:     storeFile,
-		restore:       restore,
-		hasUpdates:    false,
-		sincSave:      false,
-	}
-	if restore {
-		err := res.restoreFromFile()
-		if err != nil {
-			log.Println("storage::New: restore error:", err)
-		}
-	}
-	runtime.SetFinalizer(res, StorageFinalizer)
-	if res.storeInterval > 0*time.Second {
-		go res.saveByTimer()
-	} else {
-		res.sincSave = true
-	}
-	return res
 }

@@ -12,16 +12,29 @@ import (
 )
 
 type metricsagent struct {
-	Metrics   metrics.Metrics
-	config    agentconfig.Config
-	requester requester.Requester
+	metricsChannel chan metrics.Metrics
+	config         agentconfig.Config
+	requester      requester.Requester
+}
+
+func New(c agentconfig.Config) *metricsagent {
+	return &metricsagent{
+		metricsChannel: make(chan metrics.Metrics, 1),
+		config:         c,
+		requester:      *requester.New(c.Address),
+	}
 }
 
 func (a *metricsagent) updateMetrics() {
 	ticker := time.NewTicker(a.config.PollInterval)
 	for {
 		<-ticker.C
-		metricsperformer.New().UpdateMetrics(a.Metrics)
+		log.Println("metricsagent::updateMetrics: time to update")
+		m := <-a.metricsChannel
+		a.metricsChannel <- m
+		metricsperformer.New().UpdateMetrics(m)
+		<-a.metricsChannel
+		a.metricsChannel <- m
 		log.Println("metricsagent::updateMetrics: metrics were updated")
 	}
 }
@@ -30,7 +43,9 @@ func (a *metricsagent) sendMetrics() {
 	ticker := time.NewTicker(a.config.ReportInterval)
 	for {
 		<-ticker.C
-		for key, val := range a.Metrics.GaugeMetrics {
+		m := <-a.metricsChannel
+		a.metricsChannel <- m
+		for key, val := range m.GaugeMetrics {
 			asFloat := float64(val)
 			metricForSend := metrics.MetricsInterface{
 				ID:    key,
@@ -47,7 +62,7 @@ func (a *metricsagent) sendMetrics() {
 				log.Println("metricsagent::sendMetrics: can't send gauge with", err)
 			}
 		}
-		pc := a.Metrics.CounterMetrics["PollCount"]
+		pc := m.CounterMetrics["PollCount"]
 		asint := int64(pc)
 		metricForSend := metrics.MetricsInterface{
 			ID:    "PollCount",
@@ -69,17 +84,10 @@ func (a *metricsagent) sendMetrics() {
 
 func (a *metricsagent) Start() {
 	log.Println("metricsagent::Start: metricsagent started")
+	a.metricsChannel <- metrics.Metrics{
+		GaugeMetrics:   map[string]metrics.Gauge{},
+		CounterMetrics: map[string]metrics.Counter{},
+	}
 	go a.updateMetrics()
 	go a.sendMetrics()
-}
-
-func New(c agentconfig.Config) *metricsagent {
-	return &metricsagent{
-		Metrics: metrics.Metrics{
-			GaugeMetrics:   map[string]metrics.Gauge{},
-			CounterMetrics: map[string]metrics.Counter{},
-		},
-		config:    c,
-		requester: *requester.New(c.Address),
-	}
 }

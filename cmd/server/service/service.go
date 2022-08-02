@@ -20,6 +20,10 @@ type service struct {
 	storage Storage
 }
 
+func New(storage Storage) *service {
+	return &service{storage: storage}
+}
+
 const (
 	gauge   string = "gauge"
 	counter string = "counter"
@@ -110,8 +114,4 @@ func (ser *service) ParseAndGet(s []byte) ([]byte, error) {
 
 func (ser *service) GetKnownMetrics() []string {
 	return ser.storage.GetKnownMetrics()
-}
-
-func New(storage Storage) *service {
-	return &service{storage: storage}
 }
